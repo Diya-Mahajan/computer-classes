@@ -8,14 +8,14 @@ const defaultCourses = [
     name: "DCA",
     fee: 5000,
     duration: "6 Months",
-    topics: "MS Office, Internet, Computer Basics"
+    topics: "MS Office, Internet, Typing, Computer Basics"
   },
   {
     id: 2,
     name: "C & C++",
     fee: 6000,
     duration: "6 Months",
-    topics: "C, C++, Operators, Conditions, Loops, Functions"
+    topics: "C Programming, C++, Loops, Functions, OOP"
   },
   {
     id: 3,
@@ -30,14 +30,52 @@ const defaultCourses = [
     fee: 10000,
     duration: "8 Months",
     topics: "HTML, CSS, JavaScript, React, Node.js"
+  },
+  {
+    id: 5,
+    name: "Tally",
+    fee: 6000,
+    duration: "6 Months",
+    topics: "Tally Prime, Accounting, GST, Invoicing"
+  },
+  {
+    id: 6,
+    name: "Advanced Excel",
+    fee: 5000,
+    duration: "3 Months",
+    topics: "Formulas, Functions, Charts, Pivot Tables, Data Analysis"
+  },
+  {
+    id: 7,
+    name: "Graphic Designing",
+    fee: 7000,
+    duration: "6 Months",
+    topics: "Photoshop, Canva, Logo Design, Social Media Design"
+  },
+  {
+    id: 8,
+    name: "Java",
+    fee: 8000,
+    duration: "6 Months",
+    topics: "Java Basics, OOP, Classes, Objects, Projects"
+  },
+  {
+    id: 9,
+    name: "Digital Marketing",
+    fee: 7000,
+    duration: "6 Months",
+    topics: "SEO, Social Media, Google Ads, Meta Ads, Content Marketing"
+  },
+  {
+    id: 10,
+    name: "MS Office",
+    fee: 4000,
+    duration: "3 Months",
+    topics: "MS Word, MS Excel, PowerPoint, Internet"
   }
 ];
 
 function Admin() {
-  // =========================
-  // STUDENTS
-  // =========================
-
   const [enrollments, setEnrollments] = useState(() => {
     return JSON.parse(localStorage.getItem("enrollments")) || [];
   });
@@ -46,7 +84,6 @@ function Admin() {
   const [studentSearch, setStudentSearch] = useState("");
   const [viewingStudent, setViewingStudent] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
-
   const [showAddStudent, setShowAddStudent] = useState(false);
 
   const [newStudent, setNewStudent] = useState({
@@ -56,22 +93,34 @@ function Admin() {
     course: ""
   });
 
-  // =========================
-  // CONTACT MESSAGES
-  // =========================
-
   const [contactMessages, setContactMessages] = useState(() => {
     return JSON.parse(localStorage.getItem("contactMessages")) || [];
   });
 
   const [messageSearch, setMessageSearch] = useState("");
 
-  // =========================
-  // COURSES
-  // =========================
-
   const [courses, setCourses] = useState(() => {
-    return JSON.parse(localStorage.getItem("courses")) || defaultCourses;
+    const savedCourses =
+      JSON.parse(localStorage.getItem("courses")) || [];
+
+    const updatedCourses = [...savedCourses];
+
+    defaultCourses.forEach((defaultCourse) => {
+      const exists = updatedCourses.some(
+        (course) => course.name === defaultCourse.name
+      );
+
+      if (!exists) {
+        updatedCourses.push(defaultCourse);
+      }
+    });
+
+    localStorage.setItem(
+      "courses",
+      JSON.stringify(updatedCourses)
+    );
+
+    return updatedCourses;
   });
 
   const [showCourseModal, setShowCourseModal] = useState(false);
@@ -84,17 +133,9 @@ function Admin() {
     topics: ""
   });
 
-  // =========================
-  // ATTENDANCE
-  // =========================
-
   const [attendance, setAttendance] = useState(() => {
     return JSON.parse(localStorage.getItem("attendance")) || {};
   });
-
-  // =========================
-  // FEES
-  // =========================
 
   const [fees, setFees] = useState(() => {
     return JSON.parse(localStorage.getItem("fees")) || {};
@@ -120,19 +161,16 @@ function Admin() {
         if (error) {
           console.error("Supabase Students Error:", error);
 
-          // Keep localStorage data if online loading fails
           const localStudents =
             JSON.parse(localStorage.getItem("enrollments")) || [];
 
           setEnrollments(localStudents);
         } else {
-          const students = data || [];
-
-          setEnrollments(students);
+          setEnrollments(data || []);
 
           localStorage.setItem(
             "enrollments",
-            JSON.stringify(students)
+            JSON.stringify(data || [])
           );
         }
       } catch (error) {
@@ -151,7 +189,7 @@ function Admin() {
   }, []);
 
   // =========================
-  // SAVE LOCAL STORAGE
+  // LOCAL STORAGE
   // =========================
 
   useEffect(() => {
@@ -162,7 +200,10 @@ function Admin() {
   }, [contactMessages]);
 
   useEffect(() => {
-    localStorage.setItem("courses", JSON.stringify(courses));
+    localStorage.setItem(
+      "courses",
+      JSON.stringify(courses)
+    );
   }, [courses]);
 
   useEffect(() => {
@@ -173,7 +214,10 @@ function Admin() {
   }, [attendance]);
 
   useEffect(() => {
-    localStorage.setItem("fees", JSON.stringify(fees));
+    localStorage.setItem(
+      "fees",
+      JSON.stringify(fees)
+    );
   }, [fees]);
 
   // =========================
@@ -191,7 +235,7 @@ function Admin() {
 
       if (error) {
         console.error("Refresh Error:", error);
-        alert("Students could not be loaded from Supabase.");
+        alert("Students could not be loaded.");
       } else {
         setEnrollments(data || []);
 
@@ -209,7 +253,7 @@ function Admin() {
   };
 
   // =========================
-  // SEARCH STUDENTS
+  // SEARCH
   // =========================
 
   const filteredStudents = useMemo(() => {
@@ -246,9 +290,7 @@ function Admin() {
       `Delete student "${student.name}"?`
     );
 
-    if (!confirmDelete) {
-      return;
-    }
+    if (!confirmDelete) return;
 
     try {
       if (student.id) {
@@ -258,8 +300,8 @@ function Admin() {
           .eq("id", student.id);
 
         if (error) {
-          console.error("Delete Supabase Error:", error);
-          alert("Student could not be deleted from Supabase.");
+          console.error(error);
+          alert("Student could not be deleted.");
           return;
         }
       }
@@ -283,7 +325,7 @@ function Admin() {
   };
 
   // =========================
-  // CLEAR ALL STUDENTS
+  // CLEAR ALL
   // =========================
 
   const clearAllStudents = async () => {
@@ -296,9 +338,7 @@ function Admin() {
       "Are you sure you want to delete ALL students?"
     );
 
-    if (!confirmDelete) {
-      return;
-    }
+    if (!confirmDelete) return;
 
     try {
       const { error } = await supabase
@@ -307,8 +347,8 @@ function Admin() {
         .not("id", "is", null);
 
       if (error) {
-        console.error("Clear Students Error:", error);
-        alert("Students could not be deleted from Supabase.");
+        console.error(error);
+        alert("Students could not be deleted.");
         return;
       }
 
@@ -333,9 +373,7 @@ function Admin() {
   };
 
   const saveEditedStudent = async () => {
-    if (!editingStudent) {
-      return;
-    }
+    if (!editingStudent) return;
 
     if (
       !editingStudent.name ||
@@ -360,8 +398,8 @@ function Admin() {
           .eq("id", editingStudent.id);
 
         if (error) {
-          console.error("Edit Student Error:", error);
-          alert("Student could not be updated in Supabase.");
+          console.error(error);
+          alert("Student could not be updated.");
           return;
         }
       }
@@ -430,7 +468,7 @@ function Admin() {
         .single();
 
       if (error) {
-        console.error("Add Student Error:", error);
+        console.error(error);
         alert(error.message);
         return;
       }
@@ -461,7 +499,7 @@ function Admin() {
   };
 
   // =========================
-  // EXCEL EXPORT
+  // EXCEL
   // =========================
 
   const exportStudentsToExcel = () => {
@@ -510,7 +548,7 @@ function Admin() {
   };
 
   // =========================
-  // CONTACT MESSAGES
+  // MESSAGES
   // =========================
 
   const filteredMessages = useMemo(() => {
@@ -540,9 +578,7 @@ function Admin() {
       "Delete this message?"
     );
 
-    if (!confirmDelete) {
-      return;
-    }
+    if (!confirmDelete) return;
 
     const updated = contactMessages.filter(
       (_, i) => i !== index
@@ -638,12 +674,12 @@ function Admin() {
       "Delete this course?"
     );
 
-    if (!confirmDelete) {
-      return;
-    }
+    if (!confirmDelete) return;
 
     setCourses(
-      courses.filter((course) => course.id !== courseId)
+      courses.filter(
+        (course) => course.id !== courseId
+      )
     );
   };
 
@@ -652,7 +688,8 @@ function Admin() {
   // =========================
 
   const markAttendance = (studentId, status) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today =
+      new Date().toISOString().split("T")[0];
 
     setAttendance((oldAttendance) => {
       const studentAttendance =
@@ -694,10 +731,7 @@ function Admin() {
   // =========================
 
   const openFeeModal = (student) => {
-    const existing = fees[student.id] || {};
-
     setFeeStudent(student);
-
     setFeeAmount("");
 
     if (!fees[student.id]) {
@@ -717,15 +751,11 @@ function Admin() {
           history: []
         }
       }));
-    } else {
-      console.log("Existing Fee:", existing);
     }
   };
 
   const addFeePayment = () => {
-    if (!feeStudent) {
-      return;
-    }
+    if (!feeStudent) return;
 
     const amount = Number(feeAmount);
 
@@ -734,21 +764,27 @@ function Admin() {
       return;
     }
 
-    const currentFee = fees[feeStudent.id] || {};
+    const currentFee =
+      fees[feeStudent.id] || {};
 
-    const total = Number(currentFee.total || 0);
-    const paid = Number(currentFee.paid || 0);
+    const total =
+      Number(currentFee.total || 0);
+
+    const paid =
+      Number(currentFee.paid || 0);
 
     if (paid + amount > total) {
-      alert("Payment cannot be more than remaining fee.");
+      alert(
+        "Payment cannot be more than remaining fee."
+      );
       return;
     }
 
-    const newPaid = paid + amount;
-    const remaining = Math.max(
-      total - newPaid,
-      0
-    );
+    const newPaid =
+      paid + amount;
+
+    const remaining =
+      Math.max(total - newPaid, 0);
 
     const history = [
       ...(currentFee.history || []),
@@ -778,62 +814,51 @@ function Admin() {
   };
 
   const getTotalFees = () => {
-    return enrollments.reduce((sum, student) => {
-      return (
+    return enrollments.reduce(
+      (sum, student) =>
         sum +
         Number(
           fees[student.id]?.total || 0
-        )
-      );
-    }, 0);
+        ),
+      0
+    );
   };
 
   const getPaidFees = () => {
-    return enrollments.reduce((sum, student) => {
-      return (
+    return enrollments.reduce(
+      (sum, student) =>
         sum +
         Number(
           fees[student.id]?.paid || 0
-        )
-      );
-    }, 0);
+        ),
+      0
+    );
   };
 
   const getRemainingFees = () => {
-    return enrollments.reduce((sum, student) => {
-      return (
+    return enrollments.reduce(
+      (sum, student) =>
         sum +
         Number(
           fees[student.id]?.remaining || 0
-        )
-      );
-    }, 0);
+        ),
+      0
+    );
   };
 
   // =========================
-  // STATISTICS
+  // COURSE COUNTS
   // =========================
 
   const courseCounts = {};
 
   enrollments.forEach((student) => {
-    const course = student.course || "Unknown";
+    const course =
+      student.course || "Unknown";
 
     courseCounts[course] =
       (courseCounts[course] || 0) + 1;
   });
-
-  const attendanceStats = enrollments.map(
-    (student) => ({
-      ...student,
-      percentage:
-        getAttendancePercentage(student.id)
-    })
-  );
-
-  // =========================
-  // LOGOUT
-  // =========================
 
   const logout = () => {
     localStorage.removeItem("adminLoggedIn");
@@ -848,15 +873,22 @@ function Admin() {
   return (
     <div className="admin-page">
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
 
       <header className="admin-header">
+
         <div>
-          <h1>Admin Dashboard</h1>
-          <p>Computer Classes Management System</p>
+          <h1>
+            GROVER PT COLLEGE
+          </h1>
+
+          <p>
+            Computer Courses Management System
+          </p>
         </div>
 
         <div className="admin-header-buttons">
+
           <button
             onClick={() => {
               window.location.href = "/";
@@ -871,21 +903,27 @@ function Admin() {
           >
             Logout
           </button>
+
         </div>
+
       </header>
 
-      {/* ================= DASHBOARD CARDS ================= */}
+      {/* STATS */}
 
       <section className="admin-stats">
 
         <div className="admin-stat-card">
           <h3>Total Students</h3>
-          <strong>{enrollments.length}</strong>
+          <strong>
+            {enrollments.length}
+          </strong>
         </div>
 
         <div className="admin-stat-card">
           <h3>Total Courses</h3>
-          <strong>{courses.length}</strong>
+          <strong>
+            {courses.length}
+          </strong>
         </div>
 
         <div className="admin-stat-card">
@@ -908,17 +946,19 @@ function Admin() {
             ₹{getRemainingFees().toLocaleString()}
           </strong>
         </div>
+
       </section>
 
-      {/* ================= STUDENT MANAGEMENT ================= */}
+      {/* STUDENTS */}
 
       <section className="admin-section">
 
         <div className="section-header">
+
           <div>
             <h2>Student Management</h2>
             <p>
-              Students enrolled through the website
+              Students enrolled at GROVER PT COLLEGE
             </p>
           </div>
 
@@ -950,7 +990,9 @@ function Admin() {
             >
               Clear All
             </button>
+
           </div>
+
         </div>
 
         <input
@@ -973,6 +1015,7 @@ function Admin() {
           </div>
         ) : (
           <div className="table-wrapper">
+
             <table className="admin-table">
 
               <thead>
@@ -992,9 +1035,15 @@ function Admin() {
 
                 {filteredStudents.map(
                   (student, index) => (
-                    <tr key={student.id || index}>
+                    <tr
+                      key={
+                        student.id || index
+                      }
+                    >
 
-                      <td>{index + 1}</td>
+                      <td>
+                        {index + 1}
+                      </td>
 
                       <td>
                         {student.name}
@@ -1026,6 +1075,7 @@ function Admin() {
                       </td>
 
                       <td>
+
                         <div className="action-buttons">
 
                           <button
@@ -1070,6 +1120,7 @@ function Admin() {
                           </button>
 
                         </div>
+
                       </td>
 
                     </tr>
@@ -1077,12 +1128,15 @@ function Admin() {
                 )}
 
               </tbody>
+
             </table>
+
           </div>
         )}
+
       </section>
 
-      {/* ================= COURSE MANAGEMENT ================= */}
+      {/* COURSES */}
 
       <section className="admin-section">
 
@@ -1091,7 +1145,7 @@ function Admin() {
           <div>
             <h2>Course Management</h2>
             <p>
-              Manage courses, fees and topics
+              GROVER PT COLLEGE Courses
             </p>
           </div>
 
@@ -1111,11 +1165,16 @@ function Admin() {
               key={course.id}
             >
 
-              <h3>{course.name}</h3>
+              <h3>
+                {course.name}
+              </h3>
 
               <p>
-                <strong>Fee:</strong> ₹
-                {Number(course.fee).toLocaleString()}
+                <strong>Fee:</strong>{" "}
+                ₹
+                {Number(
+                  course.fee
+                ).toLocaleString()}
               </p>
 
               <p>
@@ -1132,7 +1191,9 @@ function Admin() {
 
                 <button
                   onClick={() =>
-                    openEditCourse(course)
+                    openEditCourse(
+                      course
+                    )
                   }
                 >
                   Edit
@@ -1141,7 +1202,9 @@ function Admin() {
                 <button
                   className="danger-btn"
                   onClick={() =>
-                    deleteCourse(course.id)
+                    deleteCourse(
+                      course.id
+                    )
                   }
                 >
                   Delete
@@ -1156,7 +1219,7 @@ function Admin() {
 
       </section>
 
-      {/* ================= COURSE COUNTS ================= */}
+      {/* COURSE COUNTS */}
 
       <section className="admin-section">
 
@@ -1164,10 +1227,13 @@ function Admin() {
 
         <div className="course-count-grid">
 
-          {Object.keys(courseCounts).length === 0 ? (
+          {Object.keys(courseCounts).length ===
+          0 ? (
             <p>No data available.</p>
           ) : (
-            Object.entries(courseCounts).map(
+            Object.entries(
+              courseCounts
+            ).map(
               ([course, count]) => (
                 <div
                   className="course-count-card"
@@ -1185,17 +1251,22 @@ function Admin() {
 
       </section>
 
-      {/* ================= ATTENDANCE ================= */}
+      {/* ATTENDANCE */}
 
       <section className="admin-section">
 
         <div className="section-header">
+
           <div>
-            <h2>Attendance Management</h2>
+            <h2>
+              Attendance Management
+            </h2>
+
             <p>
-              Mark today's student attendance
+              Mark today's attendance
             </p>
           </div>
+
         </div>
 
         {enrollments.length === 0 ? (
@@ -1219,7 +1290,7 @@ function Admin() {
 
               <tbody>
 
-                {attendanceStats.map(
+                {enrollments.map(
                   (student, index) => {
 
                     const today =
@@ -1235,11 +1306,14 @@ function Admin() {
                     return (
                       <tr
                         key={
-                          student.id || index
+                          student.id ||
+                          index
                         }
                       >
 
-                        <td>{index + 1}</td>
+                        <td>
+                          {index + 1}
+                        </td>
 
                         <td>
                           {student.name}
@@ -1292,7 +1366,10 @@ function Admin() {
                         </td>
 
                         <td>
-                          {student.percentage}%
+                          {getAttendancePercentage(
+                            student.id
+                          )}
+                          %
                         </td>
 
                       </tr>
@@ -1309,7 +1386,7 @@ function Admin() {
 
       </section>
 
-      {/* ================= FEES ================= */}
+      {/* FEES */}
 
       <section className="admin-section">
 
@@ -1355,7 +1432,9 @@ function Admin() {
 
                     return (
                       <tr
-                        key={student.id}
+                        key={
+                          student.id
+                        }
                       >
 
                         <td>
@@ -1383,11 +1462,13 @@ function Admin() {
                         <td>
                           ₹
                           {Number(
-                            fee.remaining || 0
+                            fee.remaining ||
+                              0
                           ).toLocaleString()}
                         </td>
 
                         <td>
+
                           <span
                             className={
                               fee.status ===
@@ -1399,6 +1480,7 @@ function Admin() {
                             {fee.status ||
                               "Pending"}
                           </span>
+
                         </td>
 
                         <td>
@@ -1429,7 +1511,7 @@ function Admin() {
 
       </section>
 
-      {/* ================= CONTACT MESSAGES ================= */}
+      {/* MESSAGES */}
 
       <section className="admin-section">
 
@@ -1450,11 +1532,14 @@ function Admin() {
           placeholder="Search messages..."
           value={messageSearch}
           onChange={(e) =>
-            setMessageSearch(e.target.value)
+            setMessageSearch(
+              e.target.value
+            )
           }
         />
 
-        {filteredMessages.length === 0 ? (
+        {filteredMessages.length ===
+        0 ? (
           <div className="empty-state">
             No Messages Found
           </div>
@@ -1469,18 +1554,23 @@ function Admin() {
                 >
 
                   <div>
+
                     <h3>
                       {message.name}
                     </h3>
 
                     <p>
-                      <strong>Email:</strong>{" "}
+                      <strong>
+                        Email:
+                      </strong>{" "}
                       {message.email}
                     </p>
 
                     {message.phone && (
                       <p>
-                        <strong>Phone:</strong>{" "}
+                        <strong>
+                          Phone:
+                        </strong>{" "}
                         {message.phone}
                       </p>
                     )}
@@ -1494,6 +1584,7 @@ function Admin() {
                         {message.date}
                       </small>
                     )}
+
                   </div>
 
                   <button
@@ -1514,7 +1605,7 @@ function Admin() {
 
       </section>
 
-      {/* ================= VIEW STUDENT MODAL ================= */}
+      {/* VIEW STUDENT MODAL */}
 
       {viewingStudent && (
         <div className="admin-modal">
@@ -1530,7 +1621,9 @@ function Admin() {
               ×
             </button>
 
-            <h2>Student Details</h2>
+            <h2>
+              Student Details
+            </h2>
 
             <div className="student-details">
 
@@ -1573,8 +1666,9 @@ function Admin() {
                 <strong>Total Fee:</strong>{" "}
                 ₹
                 {Number(
-                  fees[viewingStudent.id]
-                    ?.total || 0
+                  fees[
+                    viewingStudent.id
+                  ]?.total || 0
                 ).toLocaleString()}
               </p>
 
@@ -1582,8 +1676,9 @@ function Admin() {
                 <strong>Paid Fee:</strong>{" "}
                 ₹
                 {Number(
-                  fees[viewingStudent.id]
-                    ?.paid || 0
+                  fees[
+                    viewingStudent.id
+                  ]?.paid || 0
                 ).toLocaleString()}
               </p>
 
@@ -1591,8 +1686,9 @@ function Admin() {
                 <strong>Remaining Fee:</strong>{" "}
                 ₹
                 {Number(
-                  fees[viewingStudent.id]
-                    ?.remaining || 0
+                  fees[
+                    viewingStudent.id
+                  ]?.remaining || 0
                 ).toLocaleString()}
               </p>
 
@@ -1603,7 +1699,7 @@ function Admin() {
         </div>
       )}
 
-      {/* ================= EDIT STUDENT MODAL ================= */}
+      {/* EDIT STUDENT MODAL */}
 
       {editingStudent && (
         <div className="admin-modal">
@@ -1674,6 +1770,7 @@ function Admin() {
                 })
               }
             >
+
               <option value="">
                 Select Course
               </option>
@@ -1686,11 +1783,14 @@ function Admin() {
                   {course.name}
                 </option>
               ))}
+
             </select>
 
             <button
               className="save-btn"
-              onClick={saveEditedStudent}
+              onClick={
+                saveEditedStudent
+              }
             >
               Save Changes
             </button>
@@ -1700,7 +1800,7 @@ function Admin() {
         </div>
       )}
 
-      {/* ================= ADD STUDENT MODAL ================= */}
+      {/* ADD STUDENT MODAL */}
 
       {showAddStudent && (
         <div className="admin-modal">
@@ -1781,7 +1881,9 @@ function Admin() {
 
             <button
               className="save-btn"
-              onClick={handleAddStudent}
+              onClick={
+                handleAddStudent
+              }
             >
               Add Student
             </button>
@@ -1791,7 +1893,7 @@ function Admin() {
         </div>
       )}
 
-      {/* ================= COURSE MODAL ================= */}
+      {/* COURSE MODAL */}
 
       {showCourseModal && (
         <div className="admin-modal">
@@ -1872,7 +1974,7 @@ function Admin() {
         </div>
       )}
 
-      {/* ================= FEE MODAL ================= */}
+      {/* FEE MODAL */}
 
       {feeStudent && (
         <div className="admin-modal">
@@ -1903,26 +2005,38 @@ function Admin() {
             <div className="fee-box">
 
               <p>
-                <strong>Total:</strong> ₹
+                <strong>
+                  Total:
+                </strong>{" "}
+                ₹
                 {Number(
-                  fees[feeStudent.id]
-                    ?.total || 0
+                  fees[
+                    feeStudent.id
+                  ]?.total || 0
                 ).toLocaleString()}
               </p>
 
               <p>
-                <strong>Paid:</strong> ₹
+                <strong>
+                  Paid:
+                </strong>{" "}
+                ₹
                 {Number(
-                  fees[feeStudent.id]
-                    ?.paid || 0
+                  fees[
+                    feeStudent.id
+                  ]?.paid || 0
                 ).toLocaleString()}
               </p>
 
               <p>
-                <strong>Remaining:</strong> ₹
+                <strong>
+                  Remaining:
+                </strong>{" "}
+                ₹
                 {Number(
-                  fees[feeStudent.id]
-                    ?.remaining || 0
+                  fees[
+                    feeStudent.id
+                  ]?.remaining || 0
                 ).toLocaleString()}
               </p>
 
@@ -1933,13 +2047,17 @@ function Admin() {
               placeholder="Enter payment amount"
               value={feeAmount}
               onChange={(e) =>
-                setFeeAmount(e.target.value)
+                setFeeAmount(
+                  e.target.value
+                )
               }
             />
 
             <button
               className="save-btn"
-              onClick={addFeePayment}
+              onClick={
+                addFeePayment
+              }
             >
               Add Payment
             </button>
@@ -1949,8 +2067,9 @@ function Admin() {
             </h3>
 
             {(
-              fees[feeStudent.id]?.history ||
-              []
+              fees[
+                feeStudent.id
+              ]?.history || []
             ).length === 0 ? (
               <p>
                 No payments yet.
@@ -1962,9 +2081,7 @@ function Admin() {
                   feeStudent.id
                 ].history.map(
                   (payment, index) => (
-                    <div
-                      key={index}
-                    >
+                    <div key={index}>
                       ₹
                       {Number(
                         payment.amount
@@ -1983,7 +2100,7 @@ function Admin() {
         </div>
       )}
 
-      {/* ================= CSS ================= */}
+      {/* CSS */}
 
       <style>{`
 
@@ -2046,10 +2163,7 @@ function Admin() {
           transform: translateY(-1px);
         }
 
-        .logout-btn {
-          background: #dc2626;
-        }
-
+        .logout-btn,
         .danger-btn {
           background: #dc2626 !important;
         }
@@ -2129,10 +2243,6 @@ function Admin() {
           margin-bottom: 20px;
           font-size: 15px;
           outline: none;
-        }
-
-        .admin-search:focus {
-          border-color: #1769aa;
         }
 
         .table-wrapper {
@@ -2274,14 +2384,6 @@ function Admin() {
           color: #0f4c81;
         }
 
-        .message-card p {
-          margin: 8px 0;
-        }
-
-        .message-card small {
-          color: #64748b;
-        }
-
         .admin-modal {
           position: fixed;
           inset: 0;
@@ -2308,10 +2410,6 @@ function Admin() {
         .admin-modal-content h2 {
           margin-top: 0;
           color: #0f4c81;
-        }
-
-        .admin-modal-content h3 {
-          color: #1769aa;
         }
 
         .admin-modal-content input,
@@ -2343,29 +2441,19 @@ function Admin() {
           padding: 0;
         }
 
-        .student-details {
+        .student-details,
+        .fee-box {
           background: #f8fafc;
           padding: 18px;
           border-radius: 10px;
         }
 
-        .student-details p {
+        .student-details p,
+        .fee-box p {
           margin: 10px 0;
         }
 
-        .fee-box {
-          background: #f8fafc;
-          padding: 15px;
-          border-radius: 10px;
-          margin-bottom: 15px;
-        }
-
-        .fee-box p {
-          margin: 8px 0;
-        }
-
         .payment-history {
-          margin-top: 10px;
           display: flex;
           flex-direction: column;
           gap: 8px;

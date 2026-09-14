@@ -37,6 +37,60 @@ const defaultCourses = [
     fee: "₹10,000",
     duration: "8 Months",
     topics: "HTML, CSS, JavaScript, React, Node.js"
+  },
+  {
+    name: "Tally",
+    description:
+      "Learn Tally, accounting, GST and business records.",
+    fee: "₹6,000",
+    duration: "6 Months",
+    topics:
+      "Tally Prime, Accounting, GST, Invoicing"
+  },
+  {
+    name: "Advanced Excel",
+    description:
+      "Learn Advanced Excel for office and professional work.",
+    fee: "₹5,000",
+    duration: "3 Months",
+    topics:
+      "Formulas, Functions, Charts, Pivot Tables, Data Analysis"
+  },
+  {
+    name: "Graphic Designing",
+    description:
+      "Learn graphic designing and create professional designs.",
+    fee: "₹7,000",
+    duration: "6 Months",
+    topics:
+      "Photoshop, Canva, Logo Design, Social Media Design"
+  },
+  {
+    name: "Java",
+    description:
+      "Learn Java programming from basics to advanced concepts.",
+    fee: "₹8,000",
+    duration: "6 Months",
+    topics:
+      "Java Basics, OOP, Classes, Objects, Projects"
+  },
+  {
+    name: "Digital Marketing",
+    description:
+      "Learn digital marketing and social media marketing.",
+    fee: "₹7,000",
+    duration: "6 Months",
+    topics:
+      "SEO, Social Media, Google Ads, Meta Ads, Content Marketing"
+  },
+  {
+    name: "MS Office",
+    description:
+      "Learn Word, Excel, PowerPoint and professional office skills.",
+    fee: "₹4,000",
+    duration: "3 Months",
+    topics:
+      "MS Word, MS Excel, PowerPoint, Internet"
   }
 ];
 
@@ -52,7 +106,24 @@ function App() {
       JSON.parse(localStorage.getItem("courses")) || [];
 
     if (savedCourses.length > 0) {
-      return savedCourses;
+      const updatedCourses = [...savedCourses];
+
+      defaultCourses.forEach((defaultCourse) => {
+        const exists = updatedCourses.some(
+          (course) => course.name === defaultCourse.name
+        );
+
+        if (!exists) {
+          updatedCourses.push(defaultCourse);
+        }
+      });
+
+      localStorage.setItem(
+        "courses",
+        JSON.stringify(updatedCourses)
+      );
+
+      return updatedCourses;
     }
 
     localStorage.setItem(
@@ -150,11 +221,11 @@ function App() {
   return (
     <div>
 
-      {/* ================= NAVBAR ================= */}
+      {/* NAVBAR */}
 
       <nav className="navbar">
 
-        <h2>Computer Classes</h2>
+        <h2>GROVER PT COLLEGE</h2>
 
         <button
           className="menu-btn"
@@ -211,7 +282,7 @@ function App() {
 
       </nav>
 
-      {/* ================= HERO ================= */}
+      {/* HERO */}
 
       <section className="hero">
 
@@ -237,7 +308,7 @@ function App() {
 
       </section>
 
-      {/* ================= COURSES ================= */}
+      {/* COURSES */}
 
       <section
         className="courses"
@@ -268,14 +339,14 @@ function App() {
 
       </section>
 
-      {/* ================= ABOUT ================= */}
+      {/* ABOUT */}
 
       <section
         className="about"
         id="about"
       >
 
-        <h2>About Us</h2>
+        <h2>About GROVER PT COLLEGE</h2>
 
         <p>
           We provide practical computer
@@ -286,7 +357,7 @@ function App() {
 
       </section>
 
-      {/* ================= WHY US ================= */}
+      {/* WHY US */}
 
       <section className="why-us">
 
@@ -307,7 +378,7 @@ function App() {
             <h3>💻 Programming Skills</h3>
 
             <p>
-              Learn C, C++, Python and
+              Learn C, C++, Python, Java and
               modern web technologies.
             </p>
           </div>
@@ -325,7 +396,7 @@ function App() {
 
       </section>
 
-      {/* ================= CONTACT ================= */}
+      {/* CONTACT */}
 
       <section
         className="contact"
