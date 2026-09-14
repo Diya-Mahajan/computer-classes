@@ -49,9 +49,9 @@ function App() {
 
   const [courses] = useState(() => {
     const savedCourses =
-      JSON.parse(localStorage.getItem("courses"));
+      JSON.parse(localStorage.getItem("courses")) || [];
 
-    if (savedCourses && savedCourses.length > 0) {
+    if (savedCourses.length > 0) {
       return savedCourses;
     }
 
@@ -62,6 +62,10 @@ function App() {
 
     return defaultCourses;
   });
+
+  // =========================
+  // CONTACT FORM
+  // =========================
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -109,13 +113,24 @@ function App() {
     setMessage("");
   };
 
+  // =========================
+  // JOIN NOW
+  // =========================
+
   const handleJoinNow = () => {
-    document
-      .getElementById("courses")
-      .scrollIntoView({
+    const coursesSection =
+      document.getElementById("courses");
+
+    if (coursesSection) {
+      coursesSection.scrollIntoView({
         behavior: "smooth"
       });
+    }
   };
+
+  // =========================
+  // ADMIN PROTECTION
+  // =========================
 
   if (window.location.pathname === "/admin") {
     const isLoggedIn =
@@ -128,10 +143,14 @@ function App() {
     return <Admin />;
   }
 
+  // =========================
+  // WEBSITE
+  // =========================
+
   return (
     <div>
 
-      {/* NAVBAR */}
+      {/* ================= NAVBAR ================= */}
 
       <nav className="navbar">
 
@@ -140,7 +159,7 @@ function App() {
         <button
           className="menu-btn"
           onClick={() =>
-            setMenuOpen(!menuOpen)
+            setMenuOpen((prev) => !prev)
           }
         >
           ☰
@@ -154,28 +173,36 @@ function App() {
 
           <a
             href="#"
-            onClick={() => setMenuOpen(false)}
+            onClick={() =>
+              setMenuOpen(false)
+            }
           >
             Home
           </a>
 
           <a
             href="#courses"
-            onClick={() => setMenuOpen(false)}
+            onClick={() =>
+              setMenuOpen(false)
+            }
           >
             Courses
           </a>
 
           <a
             href="#about"
-            onClick={() => setMenuOpen(false)}
+            onClick={() =>
+              setMenuOpen(false)
+            }
           >
             About
           </a>
 
           <a
             href="#contact"
-            onClick={() => setMenuOpen(false)}
+            onClick={() =>
+              setMenuOpen(false)
+            }
           >
             Contact
           </a>
@@ -184,8 +211,7 @@ function App() {
 
       </nav>
 
-
-      {/* HERO */}
+      {/* ================= HERO ================= */}
 
       <section className="hero">
 
@@ -211,8 +237,7 @@ function App() {
 
       </section>
 
-
-      {/* COURSES */}
+      {/* ================= COURSES ================= */}
 
       <section
         className="courses"
@@ -229,7 +254,6 @@ function App() {
         <div className="course-container">
 
           {courses.map((course) => (
-
             <CourseCard
               key={course.name}
               name={course.name}
@@ -238,15 +262,13 @@ function App() {
               duration={course.duration}
               topics={course.topics}
             />
-
           ))}
 
         </div>
 
       </section>
 
-
-      {/* ABOUT */}
+      {/* ================= ABOUT ================= */}
 
       <section
         className="about"
@@ -264,8 +286,7 @@ function App() {
 
       </section>
 
-
-      {/* WHY US */}
+      {/* ================= WHY US ================= */}
 
       <section className="why-us">
 
@@ -304,8 +325,7 @@ function App() {
 
       </section>
 
-
-      {/* CONTACT */}
+      {/* ================= CONTACT ================= */}
 
       <section
         className="contact"
@@ -356,7 +376,7 @@ function App() {
             onChange={(e) =>
               setMessage(e.target.value)
             }
-          ></textarea>
+          />
 
           <button type="submit">
             Send Message

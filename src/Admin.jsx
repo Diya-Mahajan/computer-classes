@@ -1,267 +1,501 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
+import { supabase } from "./supabase";
 
 const defaultCourses = [
   {
+    id: 1,
     name: "DCA",
-    description: "Learn Computer Basics, MS Office, Internet and Typing.",
-    fee: "₹5,000",
+    fee: 5000,
     duration: "6 Months",
-    topics: "MS Office, Internet, Typing, Computer Basics",
+    topics: "MS Office, Internet, Computer Basics"
   },
   {
+    id: 2,
     name: "C & C++",
-    description: "Learn C and C++ programming from basics to advanced.",
-    fee: "₹6,000",
+    fee: 6000,
     duration: "6 Months",
-    topics: "C Programming, C++, Loops, Functions, OOP",
+    topics: "C, C++, Operators, Conditions, Loops, Functions"
   },
   {
+    id: 3,
     name: "Python",
-    description: "Learn Python programming, functions, OOP and projects.",
-    fee: "₹8,000",
+    fee: 8000,
     duration: "6 Months",
-    topics: "Python Basics, Functions, OOP, Projects",
+    topics: "Python Basics, Functions, OOP, Projects"
   },
   {
+    id: 4,
     name: "Web Development",
-    description: "Learn HTML, CSS, JavaScript, React and Node.js.",
-    fee: "₹10,000",
+    fee: 10000,
     duration: "8 Months",
-    topics: "HTML, CSS, JavaScript, React, Node.js",
-  },
+    topics: "HTML, CSS, JavaScript, React, Node.js"
+  }
 ];
 
 function Admin() {
-  /* ================= STUDENTS ================= */
+  // =========================
+  // STUDENTS
+  // =========================
 
-  const [enrollments, setEnrollments] = useState(
-    () => JSON.parse(localStorage.getItem("enrollments")) || []
-  );
+  const [enrollments, setEnrollments] = useState(() => {
+    return JSON.parse(localStorage.getItem("enrollments")) || [];
+  });
 
-  const [search, setSearch] = useState("");
+  const [loadingStudents, setLoadingStudents] = useState(true);
+  const [studentSearch, setStudentSearch] = useState("");
   const [viewingStudent, setViewingStudent] = useState(null);
-
   const [editingStudent, setEditingStudent] = useState(null);
-  const [editName, setEditName] = useState("");
-  const [editEmail, setEditEmail] = useState("");
-  const [editPhone, setEditPhone] = useState("");
-  const [editCourse, setEditCourse] = useState("");
 
   const [showAddStudent, setShowAddStudent] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [newCourse, setNewCourse] = useState("");
 
-  /* ================= MESSAGES ================= */
+  const [newStudent, setNewStudent] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    course: ""
+  });
 
-  const [contactMessages, setContactMessages] = useState(
-    () => JSON.parse(localStorage.getItem("contactMessages")) || []
-  );
+  // =========================
+  // CONTACT MESSAGES
+  // =========================
+
+  const [contactMessages, setContactMessages] = useState(() => {
+    return JSON.parse(localStorage.getItem("contactMessages")) || [];
+  });
 
   const [messageSearch, setMessageSearch] = useState("");
-  const [viewingMessage, setViewingMessage] = useState(null);
 
-  /* ================= COURSES ================= */
+  // =========================
+  // COURSES
+  // =========================
 
   const [courses, setCourses] = useState(() => {
-    const saved = JSON.parse(localStorage.getItem("courses"));
-
-    if (saved && saved.length > 0) {
-      return saved;
-    }
-
-    localStorage.setItem("courses", JSON.stringify(defaultCourses));
-
-    return defaultCourses;
+    return JSON.parse(localStorage.getItem("courses")) || defaultCourses;
   });
 
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
 
-  const [courseName, setCourseName] = useState("");
-  const [courseDescription, setCourseDescription] = useState("");
-  const [courseFee, setCourseFee] = useState("");
-  const [courseDuration, setCourseDuration] = useState("");
-  const [courseTopics, setCourseTopics] = useState("");
+  const [courseForm, setCourseForm] = useState({
+    name: "",
+    fee: "",
+    duration: "",
+    topics: ""
+  });
 
-  /* ================= ATTENDANCE ================= */
+  // =========================
+  // ATTENDANCE
+  // =========================
 
-  const [attendanceDate, setAttendanceDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [attendance, setAttendance] = useState(() => {
+    return JSON.parse(localStorage.getItem("attendance")) || {};
+  });
 
-  const [attendance, setAttendance] = useState(
-    () => JSON.parse(localStorage.getItem("attendance")) || {}
-  );
+  // =========================
+  // FEES
+  // =========================
 
-  const [attendanceSearch, setAttendanceSearch] = useState("");
+  const [fees, setFees] = useState(() => {
+    return JSON.parse(localStorage.getItem("fees")) || {};
+  });
 
-  /* ================= FEE MANAGEMENT ================= */
-
-  const [fees, setFees] = useState(
-    () => JSON.parse(localStorage.getItem("fees")) || {}
-  );
-
-  const [feeSearch, setFeeSearch] = useState("");
   const [feeStudent, setFeeStudent] = useState(null);
-  const [paymentAmount, setPaymentAmount] = useState("");
-  const [paymentNote, setPaymentNote] = useState("");
+  const [feeAmount, setFeeAmount] = useState("");
 
-  /* ================= COMMON ================= */
+  // =========================
+  // LOAD STUDENTS FROM SUPABASE
+  // =========================
 
-  const money = (value) =>
-    `₹${Number(value || 0).toLocaleString("en-IN")}`;
+  useEffect(() => {
+    const loadStudents = async () => {
+      setLoadingStudents(true);
 
-  /* ================= STUDENT FUNCTIONS ================= */
+      try {
+        const { data, error } = await supabase
+          .from("enrollments")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-  const saveEnrollments = (data) => {
-    setEnrollments(data);
-    localStorage.setItem("enrollments", JSON.stringify(data));
-  };
+        if (error) {
+          console.error("Supabase Students Error:", error);
 
-  const deleteStudent = (index) => {
-    if (!window.confirm("Are you sure you want to delete this student?")) {
-      return;
-    }
+          // Keep localStorage data if online loading fails
+          const localStudents =
+            JSON.parse(localStorage.getItem("enrollments")) || [];
 
-    const updated = enrollments.filter((_, i) => i !== index);
+          setEnrollments(localStudents);
+        } else {
+          const students = data || [];
 
-    saveEnrollments(updated);
-  };
+          setEnrollments(students);
 
-  const clearAllStudents = () => {
-    if (!window.confirm("Are you sure you want to delete ALL students?")) {
-      return;
-    }
+          localStorage.setItem(
+            "enrollments",
+            JSON.stringify(students)
+          );
+        }
+      } catch (error) {
+        console.error("Load Students Error:", error);
 
-    saveEnrollments([]);
-  };
+        const localStudents =
+          JSON.parse(localStorage.getItem("enrollments")) || [];
 
-  const openEditStudent = (student) => {
-    setEditingStudent(student);
-
-    setEditName(student.name);
-    setEditEmail(student.email);
-    setEditPhone(student.phone);
-    setEditCourse(student.course);
-  };
-
-  const saveEditedStudent = (e) => {
-    e.preventDefault();
-
-    if (!editName || !editEmail || !editPhone || !editCourse) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    if (!editEmail.includes("@")) {
-      alert("Please enter a valid email");
-      return;
-    }
-
-    if (editPhone.length !== 10) {
-      alert("Please enter a valid 10-digit phone number");
-      return;
-    }
-
-    const updated = enrollments.map((student) => {
-      if (student.phone === editingStudent.phone) {
-        return {
-          ...student,
-          name: editName,
-          email: editEmail,
-          phone: editPhone,
-          course: editCourse,
-        };
+        setEnrollments(localStudents);
       }
 
-      return student;
-    });
-
-    saveEnrollments(updated);
-
-    setEditingStudent(null);
-
-    alert("Student updated successfully!");
-  };
-
-  const handleAddStudent = (e) => {
-    e.preventDefault();
-
-    if (!newName || !newEmail || !newPhone || !newCourse) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    if (!newEmail.includes("@")) {
-      alert("Please enter a valid email");
-      return;
-    }
-
-    if (newPhone.length !== 10) {
-      alert("Please enter a valid 10-digit phone number");
-      return;
-    }
-
-    const duplicate = enrollments.some(
-      (student) => student.phone === newPhone
-    );
-
-    if (duplicate) {
-      alert("A student with this phone number already exists.");
-      return;
-    }
-
-    const newStudent = {
-      name: newName,
-      email: newEmail,
-      phone: newPhone,
-      course: newCourse,
-      date: new Date().toLocaleString(),
+      setLoadingStudents(false);
     };
 
-    saveEnrollments([...enrollments, newStudent]);
+    loadStudents();
+  }, []);
 
-    setNewName("");
-    setNewEmail("");
-    setNewPhone("");
-    setNewCourse("");
+  // =========================
+  // SAVE LOCAL STORAGE
+  // =========================
 
-    setShowAddStudent(false);
+  useEffect(() => {
+    localStorage.setItem(
+      "contactMessages",
+      JSON.stringify(contactMessages)
+    );
+  }, [contactMessages]);
 
-    alert("Student added successfully!");
+  useEffect(() => {
+    localStorage.setItem("courses", JSON.stringify(courses));
+  }, [courses]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "attendance",
+      JSON.stringify(attendance)
+    );
+  }, [attendance]);
+
+  useEffect(() => {
+    localStorage.setItem("fees", JSON.stringify(fees));
+  }, [fees]);
+
+  // =========================
+  // REFRESH STUDENTS
+  // =========================
+
+  const refreshStudents = async () => {
+    setLoadingStudents(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("enrollments")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Refresh Error:", error);
+        alert("Students could not be loaded from Supabase.");
+      } else {
+        setEnrollments(data || []);
+
+        localStorage.setItem(
+          "enrollments",
+          JSON.stringify(data || [])
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
+    }
+
+    setLoadingStudents(false);
   };
 
-  /* ================= EXCEL ================= */
+  // =========================
+  // SEARCH STUDENTS
+  // =========================
 
-  const exportToExcel = () => {
-    if (enrollments.length === 0) {
-      alert("No student data to export.");
+  const filteredStudents = useMemo(() => {
+    const search = studentSearch.toLowerCase().trim();
+
+    if (!search) {
+      return enrollments;
+    }
+
+    return enrollments.filter((student) => {
+      return (
+        String(student.name || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(student.email || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(student.phone || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(student.course || "")
+          .toLowerCase()
+          .includes(search)
+      );
+    });
+  }, [enrollments, studentSearch]);
+
+  // =========================
+  // DELETE STUDENT
+  // =========================
+
+  const deleteStudent = async (student) => {
+    const confirmDelete = window.confirm(
+      `Delete student "${student.name}"?`
+    );
+
+    if (!confirmDelete) {
       return;
     }
 
-    const data = enrollments.map((student) => {
-      const fee = getFeeData(student);
+    try {
+      if (student.id) {
+        const { error } = await supabase
+          .from("enrollments")
+          .delete()
+          .eq("id", student.id);
+
+        if (error) {
+          console.error("Delete Supabase Error:", error);
+          alert("Student could not be deleted from Supabase.");
+          return;
+        }
+      }
+
+      const updated = enrollments.filter(
+        (item) => item.id !== student.id
+      );
+
+      setEnrollments(updated);
+
+      localStorage.setItem(
+        "enrollments",
+        JSON.stringify(updated)
+      );
+
+      alert("Student deleted successfully.");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
+    }
+  };
+
+  // =========================
+  // CLEAR ALL STUDENTS
+  // =========================
+
+  const clearAllStudents = async () => {
+    if (enrollments.length === 0) {
+      alert("No students available.");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete ALL students?"
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("enrollments")
+        .delete()
+        .not("id", "is", null);
+
+      if (error) {
+        console.error("Clear Students Error:", error);
+        alert("Students could not be deleted from Supabase.");
+        return;
+      }
+
+      setEnrollments([]);
+      localStorage.removeItem("enrollments");
+
+      alert("All students deleted.");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
+    }
+  };
+
+  // =========================
+  // EDIT STUDENT
+  // =========================
+
+  const openEditStudent = (student) => {
+    setEditingStudent({
+      ...student
+    });
+  };
+
+  const saveEditedStudent = async () => {
+    if (!editingStudent) {
+      return;
+    }
+
+    if (
+      !editingStudent.name ||
+      !editingStudent.email ||
+      !editingStudent.phone ||
+      !editingStudent.course
+    ) {
+      alert("Please fill all fields.");
+      return;
+    }
+
+    try {
+      if (editingStudent.id) {
+        const { error } = await supabase
+          .from("enrollments")
+          .update({
+            name: editingStudent.name,
+            email: editingStudent.email,
+            phone: editingStudent.phone,
+            course: editingStudent.course
+          })
+          .eq("id", editingStudent.id);
+
+        if (error) {
+          console.error("Edit Student Error:", error);
+          alert("Student could not be updated in Supabase.");
+          return;
+        }
+      }
+
+      const updated = enrollments.map((student) =>
+        student.id === editingStudent.id
+          ? {
+              ...student,
+              name: editingStudent.name,
+              email: editingStudent.email,
+              phone: editingStudent.phone,
+              course: editingStudent.course
+            }
+          : student
+      );
+
+      setEnrollments(updated);
+
+      localStorage.setItem(
+        "enrollments",
+        JSON.stringify(updated)
+      );
+
+      setEditingStudent(null);
+
+      alert("Student updated successfully.");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
+    }
+  };
+
+  // =========================
+  // ADD STUDENT
+  // =========================
+
+  const handleAddStudent = async () => {
+    if (
+      !newStudent.name ||
+      !newStudent.email ||
+      !newStudent.phone ||
+      !newStudent.course
+    ) {
+      alert("Please fill all fields.");
+      return;
+    }
+
+    if (newStudent.phone.length !== 10) {
+      alert("Phone number must be 10 digits.");
+      return;
+    }
+
+    try {
+      const enrollment = {
+        name: newStudent.name,
+        email: newStudent.email,
+        phone: newStudent.phone,
+        course: newStudent.course,
+        date: new Date().toLocaleString()
+      };
+
+      const { data, error } = await supabase
+        .from("enrollments")
+        .insert([enrollment])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Add Student Error:", error);
+        alert(error.message);
+        return;
+      }
+
+      const updated = [data, ...enrollments];
+
+      setEnrollments(updated);
+
+      localStorage.setItem(
+        "enrollments",
+        JSON.stringify(updated)
+      );
+
+      setNewStudent({
+        name: "",
+        email: "",
+        phone: "",
+        course: ""
+      });
+
+      setShowAddStudent(false);
+
+      alert("Student added successfully.");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong.");
+    }
+  };
+
+  // =========================
+  // EXCEL EXPORT
+  // =========================
+
+  const exportStudentsToExcel = () => {
+    if (enrollments.length === 0) {
+      alert("No students available.");
+      return;
+    }
+
+    const excelData = enrollments.map((student) => {
+      const feeInfo = fees[student.id] || {};
 
       return {
-        Name: student.name,
-        Email: student.email,
-        Phone: student.phone,
-        Course: student.course,
-        EnrollmentDate: student.date,
-        TotalFee: fee.total,
-        PaidFee: fee.paid,
-        RemainingFee: fee.remaining,
-        FeeStatus: fee.status,
-        Attendance: `${getAttendancePercentage(student)}%`,
+        Name: student.name || "",
+        Email: student.email || "",
+        Phone: student.phone || "",
+        Course: student.course || "",
+        EnrollmentDate:
+          student.date ||
+          student.created_at ||
+          "",
+        CourseFee: feeInfo.total || "",
+        PaidFee: feeInfo.paid || "",
+        RemainingFee: feeInfo.remaining || "",
+        FeeStatus: feeInfo.status || "",
+        Attendance:
+          getAttendancePercentage(student.id) + "%"
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet =
+      XLSX.utils.json_to_sheet(excelData);
 
-    const workbook = XLSX.utils.book_new();
+    const workbook =
+      XLSX.utils.book_new();
 
     XLSX.utils.book_append_sheet(
       workbook,
@@ -269,13 +503,44 @@ function Admin() {
       "Students"
     );
 
-    XLSX.writeFile(workbook, "Students.xlsx");
+    XLSX.writeFile(
+      workbook,
+      "Student_Enrollments.xlsx"
+    );
   };
 
-  /* ================= MESSAGE FUNCTIONS ================= */
+  // =========================
+  // CONTACT MESSAGES
+  // =========================
+
+  const filteredMessages = useMemo(() => {
+    const search = messageSearch.toLowerCase().trim();
+
+    if (!search) {
+      return contactMessages;
+    }
+
+    return contactMessages.filter((message) => {
+      return (
+        String(message.name || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(message.email || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(message.message || "")
+          .toLowerCase()
+          .includes(search)
+      );
+    });
+  }, [contactMessages, messageSearch]);
 
   const deleteMessage = (index) => {
-    if (!window.confirm("Delete this message?")) {
+    const confirmDelete = window.confirm(
+      "Delete this message?"
+    );
+
+    if (!confirmDelete) {
       return;
     }
 
@@ -284,32 +549,21 @@ function Admin() {
     );
 
     setContactMessages(updated);
-
-    localStorage.setItem(
-      "contactMessages",
-      JSON.stringify(updated)
-    );
   };
 
-  /* ================= COURSE FUNCTIONS ================= */
-
-  const saveCourses = (data) => {
-    setCourses(data);
-
-    localStorage.setItem(
-      "courses",
-      JSON.stringify(data)
-    );
-  };
+  // =========================
+  // COURSE MANAGEMENT
+  // =========================
 
   const openAddCourse = () => {
     setEditingCourse(null);
 
-    setCourseName("");
-    setCourseDescription("");
-    setCourseFee("");
-    setCourseDuration("");
-    setCourseTopics("");
+    setCourseForm({
+      name: "",
+      fee: "",
+      duration: "",
+      topics: ""
+    });
 
     setShowCourseModal(true);
   };
@@ -317,593 +571,531 @@ function Admin() {
   const openEditCourse = (course) => {
     setEditingCourse(course);
 
-    setCourseName(course.name);
-    setCourseDescription(course.description);
-    setCourseFee(course.fee);
-    setCourseDuration(course.duration);
-    setCourseTopics(course.topics);
+    setCourseForm({
+      name: course.name,
+      fee: course.fee,
+      duration: course.duration,
+      topics: course.topics
+    });
 
     setShowCourseModal(true);
   };
 
-  const saveCourse = (e) => {
-    e.preventDefault();
-
+  const saveCourse = () => {
     if (
-      !courseName ||
-      !courseDescription ||
-      !courseFee ||
-      !courseDuration ||
-      !courseTopics
+      !courseForm.name ||
+      !courseForm.fee ||
+      !courseForm.duration ||
+      !courseForm.topics
     ) {
-      alert("Please fill all course fields");
+      alert("Please fill all course fields.");
       return;
     }
 
     if (editingCourse) {
-      const updated = courses.map((course) => {
-        if (course.name === editingCourse.name) {
-          return {
-            name: courseName,
-            description: courseDescription,
-            fee: courseFee,
-            duration: courseDuration,
-            topics: courseTopics,
-          };
-        }
-
-        return course;
-      });
-
-      saveCourses(updated);
-
-      alert("Course updated successfully!");
-    } else {
-      const exists = courses.some(
-        (course) =>
-          course.name.toLowerCase() ===
-          courseName.toLowerCase()
+      const updated = courses.map((course) =>
+        course.id === editingCourse.id
+          ? {
+              ...course,
+              name: courseForm.name,
+              fee: Number(courseForm.fee),
+              duration: courseForm.duration,
+              topics: courseForm.topics
+            }
+          : course
       );
 
-      if (exists) {
-        alert("Course already exists.");
-        return;
-      }
-
+      setCourses(updated);
+      alert("Course updated successfully.");
+    } else {
       const newCourse = {
-        name: courseName,
-        description: courseDescription,
-        fee: courseFee,
-        duration: courseDuration,
-        topics: courseTopics,
+        id: Date.now(),
+        name: courseForm.name,
+        fee: Number(courseForm.fee),
+        duration: courseForm.duration,
+        topics: courseForm.topics
       };
 
-      saveCourses([...courses, newCourse]);
+      setCourses([...courses, newCourse]);
 
-      alert("Course added successfully!");
+      alert("Course added successfully.");
     }
 
     setShowCourseModal(false);
+
+    setCourseForm({
+      name: "",
+      fee: "",
+      duration: "",
+      topics: ""
+    });
+
+    setEditingCourse(null);
   };
 
-  const deleteCourse = (courseNameToDelete) => {
-    if (
-      !window.confirm(
-        `Delete ${courseNameToDelete}?`
-      )
-    ) {
+  const deleteCourse = (courseId) => {
+    const confirmDelete = window.confirm(
+      "Delete this course?"
+    );
+
+    if (!confirmDelete) {
       return;
     }
 
-    const updated = courses.filter(
-      (course) =>
-        course.name !== courseNameToDelete
-    );
-
-    saveCourses(updated);
-  };
-
-  /* ================= ATTENDANCE ================= */
-
-  const getAttendanceKey = (student, date) => {
-    return `${date}_${student.phone}`;
-  };
-
-  const markAttendance = (student, status) => {
-    const key = getAttendanceKey(
-      student,
-      attendanceDate
-    );
-
-    const updatedAttendance = {
-      ...attendance,
-
-      [key]: {
-        studentName: student.name,
-        phone: student.phone,
-        course: student.course,
-        date: attendanceDate,
-        status: status,
-      },
-    };
-
-    setAttendance(updatedAttendance);
-
-    localStorage.setItem(
-      "attendance",
-      JSON.stringify(updatedAttendance)
+    setCourses(
+      courses.filter((course) => course.id !== courseId)
     );
   };
 
-  const getStudentAttendance = (student) => {
-    const key = getAttendanceKey(
-      student,
-      attendanceDate
-    );
+  // =========================
+  // ATTENDANCE
+  // =========================
 
-    return attendance[key]?.status || "";
+  const markAttendance = (studentId, status) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    setAttendance((oldAttendance) => {
+      const studentAttendance =
+        oldAttendance[studentId] || {};
+
+      return {
+        ...oldAttendance,
+        [studentId]: {
+          ...studentAttendance,
+          [today]: status
+        }
+      };
+    });
   };
 
-  const getAttendancePercentage = (student) => {
-    const records = Object.values(attendance).filter(
-      (record) =>
-        record.phone === student.phone
-    );
+  function getAttendancePercentage(studentId) {
+    const studentAttendance =
+      attendance[studentId] || {};
 
-    if (records.length === 0) {
+    const values =
+      Object.values(studentAttendance);
+
+    if (values.length === 0) {
       return 0;
     }
 
-    const present = records.filter(
-      (record) =>
-        record.status === "Present"
-    ).length;
+    const presentCount =
+      values.filter(
+        (status) => status === "Present"
+      ).length;
 
     return Math.round(
-      (present / records.length) * 100
+      (presentCount / values.length) * 100
     );
+  }
+
+  // =========================
+  // FEES
+  // =========================
+
+  const openFeeModal = (student) => {
+    const existing = fees[student.id] || {};
+
+    setFeeStudent(student);
+
+    setFeeAmount("");
+
+    if (!fees[student.id]) {
+      const course = courses.find(
+        (item) => item.name === student.course
+      );
+
+      const total = course?.fee || 0;
+
+      setFees((oldFees) => ({
+        ...oldFees,
+        [student.id]: {
+          total,
+          paid: 0,
+          remaining: total,
+          status: total === 0 ? "Pending" : "Pending",
+          history: []
+        }
+      }));
+    } else {
+      console.log("Existing Fee:", existing);
+    }
   };
 
-  /* ================= FEE FUNCTIONS ================= */
-
-  const saveFees = (data) => {
-    setFees(data);
-
-    localStorage.setItem(
-      "fees",
-      JSON.stringify(data)
-    );
-  };
-
-  const getCourseFee = (student) => {
-    const course = courses.find(
-      (item) =>
-        item.name === student.course
-    );
-
-    if (!course) {
-      return 0;
+  const addFeePayment = () => {
+    if (!feeStudent) {
+      return;
     }
 
-    const number = String(
-      course.fee || ""
-    ).replace(/[^\d.]/g, "");
+    const amount = Number(feeAmount);
 
-    return Number(number) || 0;
-  };
+    if (!amount || amount <= 0) {
+      alert("Enter a valid payment amount.");
+      return;
+    }
 
-  const getFeeData = (student) => {
-    const key = student.phone;
+    const currentFee = fees[feeStudent.id] || {};
 
-    const total = getCourseFee(student);
+    const total = Number(currentFee.total || 0);
+    const paid = Number(currentFee.paid || 0);
 
-    const saved = fees[key] || {};
+    if (paid + amount > total) {
+      alert("Payment cannot be more than remaining fee.");
+      return;
+    }
 
-    const paid = Number(saved.paid) || 0;
-
+    const newPaid = paid + amount;
     const remaining = Math.max(
-      total - paid,
+      total - newPaid,
       0
     );
 
-    let status = "Pending";
+    const history = [
+      ...(currentFee.history || []),
+      {
+        amount,
+        date: new Date().toLocaleString()
+      }
+    ];
 
-    if (total > 0 && paid >= total) {
-      status = "Paid";
-    } else if (paid > 0) {
-      status = "Partial";
-    }
-
-    return {
-      total,
-      paid,
-      remaining,
-      status,
-      payments: saved.payments || [],
-    };
-  };
-
-  const openFeePayment = (student) => {
-    setFeeStudent(student);
-
-    setPaymentAmount("");
-    setPaymentNote("");
-  };
-
-  const addPayment = (e) => {
-    e.preventDefault();
-
-    const amount = Number(
-      paymentAmount
-    );
-
-    if (!amount || amount <= 0) {
-      alert("Please enter a valid payment amount.");
-      return;
-    }
-
-    const current = getFeeData(
-      feeStudent
-    );
-
-    if (current.total <= 0) {
-      alert(
-        "Course fee is not available."
-      );
-      return;
-    }
-
-    if (amount > current.remaining) {
-      alert(
-        `Maximum remaining fee is ${money(
-          current.remaining
-        )}.`
-      );
-
-      return;
-    }
-
-    const key = feeStudent.phone;
-
-    const old = fees[key] || {
-      paid: 0,
-      payments: [],
-    };
-
-    const payment = {
-      amount: amount,
-
-      note:
-        paymentNote ||
-        "Fee Payment",
-
-      date:
-        new Date().toLocaleString(),
-    };
-
-    const updatedFees = {
-      ...fees,
-
-      [key]: {
-        ...old,
-
-        paid:
-          (Number(old.paid) || 0) +
-          amount,
-
-        payments: [
-          ...(old.payments || []),
-          payment,
-        ],
-      },
-    };
-
-    saveFees(updatedFees);
-
-    setFeeStudent(null);
-
-    alert(
-      "Payment added successfully!"
-    );
-  };
-
-  const resetFee = (student) => {
-    if (
-      !window.confirm(
-        `Reset all fee payments for ${student.name}?`
-      )
-    ) {
-      return;
-    }
-
-    const updated = {
-      ...fees,
-    };
-
-    delete updated[student.phone];
-
-    saveFees(updated);
-
-    alert(
-      "Fee record reset successfully."
-    );
-  };
-
-  /* ================= CALCULATIONS ================= */
-
-  const totalFees = enrollments.reduce(
-    (sum, student) =>
-      sum + getFeeData(student).total,
-    0
-  );
-
-  const totalPaid = enrollments.reduce(
-    (sum, student) =>
-      sum + getFeeData(student).paid,
-    0
-  );
-
-  const totalRemaining = Math.max(
-    totalFees - totalPaid,
-    0
-  );
-
-  const paidStudents =
-    enrollments.filter(
-      (student) =>
-        getFeeData(student).status ===
-        "Paid"
-    ).length;
-
-  const partialStudents =
-    enrollments.filter(
-      (student) =>
-        getFeeData(student).status ===
-        "Partial"
-    ).length;
-
-  const pendingStudents =
-    enrollments.filter(
-      (student) =>
-        getFeeData(student).status ===
-        "Pending"
-    ).length;
-
-  const filteredFeeStudents =
-    enrollments.filter((student) => {
-      const text =
-        feeSearch.toLowerCase();
-
-      return (
-        student.name
-          .toLowerCase()
-          .includes(text) ||
-        student.phone
-          .toLowerCase()
-          .includes(text) ||
-        student.course
-          .toLowerCase()
-          .includes(text)
-      );
-    });
-
-  const filteredStudents =
-    enrollments.filter((student) => {
-      const text =
-        search.toLowerCase();
-
-      return (
-        student.name
-          .toLowerCase()
-          .includes(text) ||
-        student.email
-          .toLowerCase()
-          .includes(text) ||
-        student.phone
-          .toLowerCase()
-          .includes(text) ||
-        student.course
-          .toLowerCase()
-          .includes(text)
-      );
-    });
-
-  const filteredMessages =
-    contactMessages.filter((item) => {
-      const text =
-        messageSearch.toLowerCase();
-
-      return (
-        item.name
-          .toLowerCase()
-          .includes(text) ||
-        item.email
-          .toLowerCase()
-          .includes(text) ||
-        item.message
-          .toLowerCase()
-          .includes(text)
-      );
-    });
-
-  const filteredAttendance =
-    enrollments.filter((student) => {
-      const text =
-        attendanceSearch.toLowerCase();
-
-      return (
-        student.name
-          .toLowerCase()
-          .includes(text) ||
-        student.course
-          .toLowerCase()
-          .includes(text) ||
-        student.phone
-          .toLowerCase()
-          .includes(text)
-      );
-    });
-
-  const courseCounts =
-    courses.map((course) => ({
-      name: course.name,
-
-      count: enrollments.filter(
-        (student) =>
-          student.course ===
-          course.name
-      ).length,
+    setFees((oldFees) => ({
+      ...oldFees,
+      [feeStudent.id]: {
+        total,
+        paid: newPaid,
+        remaining,
+        status:
+          remaining === 0
+            ? "Paid"
+            : "Pending",
+        history
+      }
     }));
 
-  const totalAttendanceRecords =
-    Object.values(attendance).length;
+    setFeeAmount("");
 
-  const presentToday =
-    Object.values(attendance).filter(
-      (record) =>
-        record.date ===
-          attendanceDate &&
-        record.status ===
-          "Present"
-    ).length;
-
-  const absentToday =
-    Object.values(attendance).filter(
-      (record) =>
-        record.date ===
-          attendanceDate &&
-        record.status ===
-          "Absent"
-    ).length;
-
-  /* ================= LOGOUT ================= */
-
-  const handleLogout = () => {
-    localStorage.removeItem(
-      "adminLoggedIn"
-    );
-
-    window.location.href =
-      "/admin";
+    alert("Fee payment added.");
   };
+
+  const getTotalFees = () => {
+    return enrollments.reduce((sum, student) => {
+      return (
+        sum +
+        Number(
+          fees[student.id]?.total || 0
+        )
+      );
+    }, 0);
+  };
+
+  const getPaidFees = () => {
+    return enrollments.reduce((sum, student) => {
+      return (
+        sum +
+        Number(
+          fees[student.id]?.paid || 0
+        )
+      );
+    }, 0);
+  };
+
+  const getRemainingFees = () => {
+    return enrollments.reduce((sum, student) => {
+      return (
+        sum +
+        Number(
+          fees[student.id]?.remaining || 0
+        )
+      );
+    }, 0);
+  };
+
+  // =========================
+  // STATISTICS
+  // =========================
+
+  const courseCounts = {};
+
+  enrollments.forEach((student) => {
+    const course = student.course || "Unknown";
+
+    courseCounts[course] =
+      (courseCounts[course] || 0) + 1;
+  });
+
+  const attendanceStats = enrollments.map(
+    (student) => ({
+      ...student,
+      percentage:
+        getAttendancePercentage(student.id)
+    })
+  );
+
+  // =========================
+  // LOGOUT
+  // =========================
+
+  const logout = () => {
+    localStorage.removeItem("adminLoggedIn");
+
+    window.location.href = "/";
+  };
+
+  // =========================
+  // UI
+  // =========================
 
   return (
     <div className="admin-page">
 
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
 
-      <div className="admin-header">
-
+      <header className="admin-header">
         <div>
-          <h1>
-            Admin Dashboard
-          </h1>
-
-          <p>
-            Manage students, courses,
-            fees, messages and attendance
-          </p>
+          <h1>Admin Dashboard</h1>
+          <p>Computer Classes Management System</p>
         </div>
 
-        <div className="admin-header-actions">
-
+        <div className="admin-header-buttons">
           <button
-            className="admin-back-btn"
-            onClick={() =>
-              (window.location.href =
-                "/")
-            }
+            onClick={() => {
+              window.location.href = "/";
+            }}
           >
-            ← Website
+            Back to Website
           </button>
 
           <button
             className="logout-btn"
-            onClick={handleLogout}
+            onClick={logout}
           >
             Logout
           </button>
-
         </div>
+      </header>
 
-      </div>
+      {/* ================= DASHBOARD CARDS ================= */}
 
-      {/* STATS */}
-
-      <div className="admin-stats">
+      <section className="admin-stats">
 
         <div className="admin-stat-card">
-          <div className="stat-icon">
-            👨‍🎓
-          </div>
-
-          <div>
-            <h3>Total Students</h3>
-            <strong>
-              {enrollments.length}
-            </strong>
-          </div>
+          <h3>Total Students</h3>
+          <strong>{enrollments.length}</strong>
         </div>
 
         <div className="admin-stat-card">
-          <div className="stat-icon">
-            📚
-          </div>
-
-          <div>
-            <h3>Total Courses</h3>
-            <strong>
-              {courses.length}
-            </strong>
-          </div>
+          <h3>Total Courses</h3>
+          <strong>{courses.length}</strong>
         </div>
 
         <div className="admin-stat-card">
-          <div className="stat-icon">
-            📩
-          </div>
-
-          <div>
-            <h3>Messages</h3>
-            <strong>
-              {contactMessages.length}
-            </strong>
-          </div>
+          <h3>Total Fees</h3>
+          <strong>
+            ₹{getTotalFees().toLocaleString()}
+          </strong>
         </div>
 
         <div className="admin-stat-card">
-          <div className="stat-icon">
-            📅
-          </div>
-
-          <div>
-            <h3>Attendance Records</h3>
-            <strong>
-              {totalAttendanceRecords}
-            </strong>
-          </div>
+          <h3>Paid Fees</h3>
+          <strong>
+            ₹{getPaidFees().toLocaleString()}
+          </strong>
         </div>
 
-      </div>
+        <div className="admin-stat-card">
+          <h3>Remaining Fees</h3>
+          <strong>
+            ₹{getRemainingFees().toLocaleString()}
+          </strong>
+        </div>
+      </section>
 
-      {/* COURSE MANAGEMENT */}
+      {/* ================= STUDENT MANAGEMENT ================= */}
 
-      <section className="course-management">
+      <section className="admin-section">
 
-        <div className="management-heading">
-
+        <div className="section-header">
           <div>
-            <h2>
-              📚 Course Management
-            </h2>
-
+            <h2>Student Management</h2>
             <p>
-              Add, edit and delete courses
+              Students enrolled through the website
+            </p>
+          </div>
+
+          <div className="section-actions">
+
+            <button
+              onClick={refreshStudents}
+            >
+              Refresh
+            </button>
+
+            <button
+              onClick={() =>
+                setShowAddStudent(true)
+              }
+            >
+              + Add Student
+            </button>
+
+            <button
+              onClick={exportStudentsToExcel}
+            >
+              Export Excel
+            </button>
+
+            <button
+              className="danger-btn"
+              onClick={clearAllStudents}
+            >
+              Clear All
+            </button>
+          </div>
+        </div>
+
+        <input
+          className="admin-search"
+          type="text"
+          placeholder="Search by name, email, phone or course..."
+          value={studentSearch}
+          onChange={(e) =>
+            setStudentSearch(e.target.value)
+          }
+        />
+
+        {loadingStudents ? (
+          <div className="empty-state">
+            Loading students...
+          </div>
+        ) : filteredStudents.length === 0 ? (
+          <div className="empty-state">
+            No Students Found
+          </div>
+        ) : (
+          <div className="table-wrapper">
+            <table className="admin-table">
+
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Course</th>
+                  <th>Date</th>
+                  <th>Attendance</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                {filteredStudents.map(
+                  (student, index) => (
+                    <tr key={student.id || index}>
+
+                      <td>{index + 1}</td>
+
+                      <td>
+                        {student.name}
+                      </td>
+
+                      <td>
+                        {student.email}
+                      </td>
+
+                      <td>
+                        {student.phone}
+                      </td>
+
+                      <td>
+                        {student.course}
+                      </td>
+
+                      <td>
+                        {student.date ||
+                          student.created_at ||
+                          "-"}
+                      </td>
+
+                      <td>
+                        {getAttendancePercentage(
+                          student.id
+                        )}
+                        %
+                      </td>
+
+                      <td>
+                        <div className="action-buttons">
+
+                          <button
+                            onClick={() =>
+                              setViewingStudent(
+                                student
+                              )
+                            }
+                          >
+                            View
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              openEditStudent(
+                                student
+                              )
+                            }
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              openFeeModal(
+                                student
+                              )
+                            }
+                          >
+                            Fee
+                          </button>
+
+                          <button
+                            className="danger-btn"
+                            onClick={() =>
+                              deleteStudent(
+                                student
+                              )
+                            }
+                          >
+                            Delete
+                          </button>
+
+                        </div>
+                      </td>
+
+                    </tr>
+                  )
+                )}
+
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* ================= COURSE MANAGEMENT ================= */}
+
+      <section className="admin-section">
+
+        <div className="section-header">
+
+          <div>
+            <h2>Course Management</h2>
+            <p>
+              Manage courses, fees and topics
             </p>
           </div>
 
           <button
-            className="add-course-btn"
             onClick={openAddCourse}
           >
             + Add Course
@@ -911,117 +1103,81 @@ function Admin() {
 
         </div>
 
-        <div className="admin-course-grid">
+        <div className="course-admin-grid">
 
           {courses.map((course) => (
-
             <div
-              className="admin-course-card"
-              key={course.name}
+              className="course-admin-card"
+              key={course.id}
             >
 
-              <div className="admin-course-icon">
-                📘
-              </div>
-
-              <h3>
-                {course.name}
-              </h3>
+              <h3>{course.name}</h3>
 
               <p>
-                {course.description}
+                <strong>Fee:</strong> ₹
+                {Number(course.fee).toLocaleString()}
               </p>
 
-              <div className="admin-course-info">
+              <p>
+                <strong>Duration:</strong>{" "}
+                {course.duration}
+              </p>
 
-                <span>
-                  💰 {course.fee}
-                </span>
+              <p>
+                <strong>Topics:</strong>{" "}
+                {course.topics}
+              </p>
 
-                <span>
-                  ⏰ {course.duration}
-                </span>
-
-              </div>
-
-              <div className="admin-course-topics">
-
-                <strong>
-                  📚 Topics
-                </strong>
-
-                <p>
-                  {course.topics}
-                </p>
-
-              </div>
-
-              <div className="course-management-actions">
+              <div className="action-buttons">
 
                 <button
-                  className="course-edit-btn"
                   onClick={() =>
-                    openEditCourse(
-                      course
-                    )
+                    openEditCourse(course)
                   }
                 >
-                  ✏️ Edit
+                  Edit
                 </button>
 
                 <button
-                  className="course-delete-btn"
+                  className="danger-btn"
                   onClick={() =>
-                    deleteCourse(
-                      course.name
-                    )
+                    deleteCourse(course.id)
                   }
                 >
-                  🗑️ Delete
+                  Delete
                 </button>
 
               </div>
 
             </div>
-
           ))}
 
         </div>
 
       </section>
 
-      {/* COURSE SUMMARY */}
+      {/* ================= COURSE COUNTS ================= */}
 
-      <section className="course-summary">
+      <section className="admin-section">
 
-        <h2>
-          📊 Course Summary
-        </h2>
+        <h2>Course-wise Students</h2>
 
-        <div className="course-summary-grid">
+        <div className="course-count-grid">
 
-          {courseCounts.map(
-            (course) => (
-
-              <div
-                className="course-summary-card"
-                key={course.name}
-              >
-
-                <h3>
-                  {course.name}
-                </h3>
-
-                <strong>
-                  {course.count}
-                </strong>
-
-                <p>
-                  Students
-                </p>
-
-              </div>
-
+          {Object.keys(courseCounts).length === 0 ? (
+            <p>No data available.</p>
+          ) : (
+            Object.entries(courseCounts).map(
+              ([course, count]) => (
+                <div
+                  className="course-count-card"
+                  key={course}
+                >
+                  <h3>{course}</h3>
+                  <strong>{count}</strong>
+                  <p>Students</p>
+                </div>
+              )
             )
           )}
 
@@ -1029,270 +1185,68 @@ function Admin() {
 
       </section>
 
-      {/* ANALYTICS */}
+      {/* ================= ATTENDANCE ================= */}
 
-      <section className="analytics-section">
+      <section className="admin-section">
 
-        <div className="analytics-heading">
-
-          <h2>
-            📈 Analytics
-          </h2>
-
-          <p>
-            Overview of your institute
-          </p>
-
+        <div className="section-header">
+          <div>
+            <h2>Attendance Management</h2>
+            <p>
+              Mark today's student attendance
+            </p>
+          </div>
         </div>
 
-        {enrollments.length ===
-        0 ? (
-
-          <div className="analytics-empty">
-
-            <div>
-              📊
-            </div>
-
-            <h3>
-              No Data Yet
-            </h3>
-
-            <p>
-              Add students to see analytics.
-            </p>
-
+        {enrollments.length === 0 ? (
+          <div className="empty-state">
+            No students available.
           </div>
-
         ) : (
+          <div className="table-wrapper">
 
-          <div className="analytics-grid">
-
-            {courseCounts.map(
-              (course) => {
-
-                const percentage =
-                  Math.round(
-                    (course.count /
-                      enrollments.length) *
-                      100
-                  );
-
-                return (
-
-                  <div
-                    className="analytics-card"
-                    key={course.name}
-                  >
-
-                    <div className="analytics-card-top">
-
-                      <div>
-
-                        <h3>
-                          {course.name}
-                        </h3>
-
-                        <p>
-                          Student Enrollment
-                        </p>
-
-                      </div>
-
-                      <strong>
-                        {course.count}
-                      </strong>
-
-                    </div>
-
-                    <div className="progress-bar">
-
-                      <div
-                        className="progress-fill"
-                        style={{
-                          width:
-                            `${percentage}%`,
-                        }}
-                      />
-
-                    </div>
-
-                    <span>
-                      {percentage}% of total students
-                    </span>
-
-                  </div>
-
-                );
-              }
-            )}
-
-          </div>
-
-        )}
-
-      </section>
-
-      {/* ATTENDANCE */}
-
-      <section className="attendance-section">
-
-        <div className="attendance-heading">
-
-          <div>
-
-            <h2>
-              📅 Attendance Management
-            </h2>
-
-            <p>
-              Mark and manage student attendance
-            </p>
-
-          </div>
-
-          <input
-            type="date"
-            value={attendanceDate}
-            onChange={(e) =>
-              setAttendanceDate(
-                e.target.value
-              )
-            }
-          />
-
-        </div>
-
-        <div className="attendance-today-stats">
-
-          <div>
-            <strong>
-              {enrollments.length}
-            </strong>
-
-            <span>
-              Total Students
-            </span>
-          </div>
-
-          <div>
-            <strong>
-              {presentToday}
-            </strong>
-
-            <span>
-              Present Today
-            </span>
-          </div>
-
-          <div>
-            <strong>
-              {absentToday}
-            </strong>
-
-            <span>
-              Absent Today
-            </span>
-          </div>
-
-        </div>
-
-        <input
-          className="attendance-search"
-          placeholder="Search student or course..."
-          value={attendanceSearch}
-          onChange={(e) =>
-            setAttendanceSearch(
-              e.target.value
-            )
-          }
-        />
-
-        {enrollments.length ===
-        0 ? (
-
-          <div className="attendance-empty">
-
-            <div>
-              📅
-            </div>
-
-            <h3>
-              No Students Available
-            </h3>
-
-            <p>
-              Add students first to mark attendance.
-            </p>
-
-          </div>
-
-        ) : (
-
-          <div className="attendance-table-wrapper">
-
-            <table className="attendance-table">
+            <table className="admin-table">
 
               <thead>
-
                 <tr>
+                  <th>#</th>
                   <th>Student</th>
                   <th>Course</th>
-                  <th>Status</th>
-                  <th>Attendance</th>
+                  <th>Today</th>
+                  <th>Attendance %</th>
                 </tr>
-
               </thead>
 
               <tbody>
 
-                {filteredAttendance.map(
+                {attendanceStats.map(
                   (student, index) => {
 
-                    const status =
-                      getStudentAttendance(
-                        student
-                      );
+                    const today =
+                      new Date()
+                        .toISOString()
+                        .split("T")[0];
 
-                    const percentage =
-                      getAttendancePercentage(
-                        student
-                      );
+                    const todayStatus =
+                      attendance[
+                        student.id
+                      ]?.[today] || "";
 
                     return (
+                      <tr
+                        key={
+                          student.id || index
+                        }
+                      >
 
-                      <tr key={index}>
+                        <td>{index + 1}</td>
 
                         <td>
-
-                          <div className="attendance-student">
-
-                            <div className="attendance-avatar">
-                              {student.name
-                                .charAt(0)
-                                .toUpperCase()}
-                            </div>
-
-                            <div>
-
-                              <strong>
-                                {student.name}
-                              </strong>
-
-                              <small>
-                                {student.phone}
-                              </small>
-
-                            </div>
-
-                          </div>
-
+                          {student.name}
                         </td>
 
                         <td>
-                          <span className="attendance-course">
-                            {student.course}
-                          </span>
+                          {student.course}
                         </td>
 
                         <td>
@@ -1301,36 +1255,36 @@ function Admin() {
 
                             <button
                               className={
-                                status ===
+                                todayStatus ===
                                 "Present"
-                                  ? "present-btn active"
-                                  : "present-btn"
+                                  ? "active-present"
+                                  : ""
                               }
                               onClick={() =>
                                 markAttendance(
-                                  student,
+                                  student.id,
                                   "Present"
                                 )
                               }
                             >
-                              ✓ Present
+                              Present
                             </button>
 
                             <button
                               className={
-                                status ===
+                                todayStatus ===
                                 "Absent"
-                                  ? "absent-btn active"
-                                  : "absent-btn"
+                                  ? "active-absent"
+                                  : ""
                               }
                               onClick={() =>
                                 markAttendance(
-                                  student,
+                                  student.id,
                                   "Absent"
                                 )
                               }
                             >
-                              ✕ Absent
+                              Absent
                             </button>
 
                           </div>
@@ -1338,30 +1292,10 @@ function Admin() {
                         </td>
 
                         <td>
-
-                          <div className="attendance-percent">
-
-                            <strong>
-                              {percentage}%
-                            </strong>
-
-                            <div className="attendance-progress">
-
-                              <div
-                                style={{
-                                  width:
-                                    `${percentage}%`,
-                                }}
-                              />
-
-                            </div>
-
-                          </div>
-
+                          {student.percentage}%
                         </td>
 
                       </tr>
-
                     );
                   }
                 )}
@@ -1371,1445 +1305,582 @@ function Admin() {
             </table>
 
           </div>
-
         )}
 
       </section>
 
-      {/* ATTENDANCE REPORT */}
+      {/* ================= FEES ================= */}
 
-      <section className="attendance-report-section">
+      <section className="admin-section">
 
-        <div className="attendance-report-heading">
+        <div className="section-header">
 
           <div>
-
-            <h2>
-              📊 Attendance Report
-            </h2>
-
+            <h2>Fee Management</h2>
             <p>
-              Complete student attendance summary
+              Track student fee payments
             </p>
-
           </div>
 
         </div>
 
-        <div className="attendance-report-grid">
+        {enrollments.length === 0 ? (
+          <div className="empty-state">
+            No students available.
+          </div>
+        ) : (
+          <div className="table-wrapper">
 
-          {enrollments.map(
-            (student, index) => {
+            <table className="admin-table">
 
-              const records =
-                Object.values(
-                  attendance
-                ).filter(
-                  (record) =>
-                    record.phone ===
-                    student.phone
-                );
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Course</th>
+                  <th>Total</th>
+                  <th>Paid</th>
+                  <th>Remaining</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-              const present =
-                records.filter(
-                  (record) =>
-                    record.status ===
-                    "Present"
-                ).length;
+              <tbody>
 
-              const absent =
-                records.filter(
-                  (record) =>
-                    record.status ===
-                    "Absent"
-                ).length;
+                {enrollments.map(
+                  (student) => {
 
-              const total =
-                records.length;
+                    const fee =
+                      fees[student.id] || {};
 
-              const percentage =
-                total > 0
-                  ? Math.round(
-                      (present /
-                        total) *
-                        100
-                    )
-                  : 0;
+                    return (
+                      <tr
+                        key={student.id}
+                      >
 
-              return (
+                        <td>
+                          {student.name}
+                        </td>
 
+                        <td>
+                          {student.course}
+                        </td>
+
+                        <td>
+                          ₹
+                          {Number(
+                            fee.total || 0
+                          ).toLocaleString()}
+                        </td>
+
+                        <td>
+                          ₹
+                          {Number(
+                            fee.paid || 0
+                          ).toLocaleString()}
+                        </td>
+
+                        <td>
+                          ₹
+                          {Number(
+                            fee.remaining || 0
+                          ).toLocaleString()}
+                        </td>
+
+                        <td>
+                          <span
+                            className={
+                              fee.status ===
+                              "Paid"
+                                ? "status-paid"
+                                : "status-pending"
+                            }
+                          >
+                            {fee.status ||
+                              "Pending"}
+                          </span>
+                        </td>
+
+                        <td>
+
+                          <button
+                            onClick={() =>
+                              openFeeModal(
+                                student
+                              )
+                            }
+                          >
+                            Manage Fee
+                          </button>
+
+                        </td>
+
+                      </tr>
+                    );
+                  }
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+        )}
+
+      </section>
+
+      {/* ================= CONTACT MESSAGES ================= */}
+
+      <section className="admin-section">
+
+        <div className="section-header">
+
+          <div>
+            <h2>Contact Messages</h2>
+            <p>
+              Messages received from website
+            </p>
+          </div>
+
+        </div>
+
+        <input
+          className="admin-search"
+          type="text"
+          placeholder="Search messages..."
+          value={messageSearch}
+          onChange={(e) =>
+            setMessageSearch(e.target.value)
+          }
+        />
+
+        {filteredMessages.length === 0 ? (
+          <div className="empty-state">
+            No Messages Found
+          </div>
+        ) : (
+          <div className="message-list">
+
+            {filteredMessages.map(
+              (message, index) => (
                 <div
-                  className="attendance-report-card"
+                  className="message-card"
                   key={index}
                 >
 
-                  <div className="report-student-top">
+                  <div>
+                    <h3>
+                      {message.name}
+                    </h3>
 
-                    <div className="attendance-avatar">
-                      {student.name
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
-
-                    <div>
-
-                      <h3>
-                        {student.name}
-                      </h3>
-
-                      <p>
-                        {student.course}
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <div className="report-stats">
-
-                    <div>
-                      <strong>
-                        {total}
-                      </strong>
-                      <span>
-                        Total Days
-                      </span>
-                    </div>
-
-                    <div>
-                      <strong>
-                        {present}
-                      </strong>
-                      <span>
-                        Present
-                      </span>
-                    </div>
-
-                    <div>
-                      <strong>
-                        {absent}
-                      </strong>
-                      <span>
-                        Absent
-                      </span>
-                    </div>
-
-                  </div>
-
-                  <div className="report-percentage">
-
-                    <div className="report-percent-top">
-
-                      <span>
-                        Attendance Percentage
-                      </span>
-
-                      <strong>
-                        {percentage}%
-                      </strong>
-
-                    </div>
-
-                    <div className="report-progress">
-
-                      <div
-                        style={{
-                          width:
-                            `${percentage}%`,
-                        }}
-                      />
-
-                    </div>
-
-                  </div>
-
-                  {total === 0 && (
-                    <p className="no-attendance-text">
-                      No attendance marked yet.
+                    <p>
+                      <strong>Email:</strong>{" "}
+                      {message.email}
                     </p>
-                  )}
 
-                </div>
-
-              );
-            }
-          )}
-
-        </div>
-
-      </section>
-
-      {/* ================= FEE MANAGEMENT ================= */}
-
-      <section
-        className="fee-management-section"
-      >
-
-        <div className="fee-heading">
-
-          <div>
-
-            <h2>
-              💰 Fee Management
-            </h2>
-
-            <p>
-              Manage student fees and payments
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* FEE SUMMARY */}
-
-        <div className="fee-summary-grid">
-
-          <div className="fee-summary-card">
-            <span>
-              Total Fees
-            </span>
-
-            <strong>
-              {money(totalFees)}
-            </strong>
-          </div>
-
-          <div className="fee-summary-card">
-            <span>
-              Paid Amount
-            </span>
-
-            <strong className="fee-paid">
-              {money(totalPaid)}
-            </strong>
-          </div>
-
-          <div className="fee-summary-card">
-            <span>
-              Remaining
-            </span>
-
-            <strong className="fee-due">
-              {money(totalRemaining)}
-            </strong>
-          </div>
-
-          <div className="fee-summary-card">
-            <span>
-              Paid Students
-            </span>
-
-            <strong className="fee-paid">
-              {paidStudents}
-            </strong>
-          </div>
-
-          <div className="fee-summary-card">
-            <span>
-              Partial
-            </span>
-
-            <strong className="fee-partial">
-              {partialStudents}
-            </strong>
-          </div>
-
-          <div className="fee-summary-card">
-            <span>
-              Pending
-            </span>
-
-            <strong className="fee-due">
-              {pendingStudents}
-            </strong>
-          </div>
-
-        </div>
-
-        {/* SEARCH */}
-
-        <input
-          className="fee-search"
-          placeholder="🔍 Search student, phone or course..."
-          value={feeSearch}
-          onChange={(e) =>
-            setFeeSearch(
-              e.target.value
-            )
-          }
-        />
-
-        {/* FEE CARDS */}
-
-        {filteredFeeStudents.length ===
-        0 ? (
-
-          <div className="fee-empty">
-
-            <div>
-              💰
-            </div>
-
-            <h3>
-              No Fee Records Found
-            </h3>
-
-            <p>
-              Add students to manage their fees.
-            </p>
-
-          </div>
-
-        ) : (
-
-          <div className="fee-student-grid">
-
-            {filteredFeeStudents.map(
-              (student) => {
-
-                const fee =
-                  getFeeData(
-                    student
-                  );
-
-                const percent =
-                  fee.total > 0
-                    ? Math.min(
-                        Math.round(
-                          (fee.paid /
-                            fee.total) *
-                            100
-                        ),
-                        100
-                      )
-                    : 0;
-
-                return (
-
-                  <div
-                    className="fee-student-card"
-                    key={student.phone}
-                  >
-
-                    <div className="fee-student-top">
-
-                      <div className="fee-student-info">
-
-                        <div className="fee-avatar">
-
-                          {student.name
-                            .charAt(0)
-                            .toUpperCase()}
-
-                        </div>
-
-                        <div>
-
-                          <h3>
-                            {student.name}
-                          </h3>
-
-                          <p>
-                            {student.course}
-                          </p>
-
-                        </div>
-
-                      </div>
-
-                      <span
-                        className={
-                          fee.status ===
-                          "Paid"
-                            ? "fee-status paid"
-                            : fee.status ===
-                              "Partial"
-                            ? "fee-status partial"
-                            : "fee-status pending"
-                        }
-                      >
-                        {fee.status}
-                      </span>
-
-                    </div>
-
-                    <div className="fee-numbers">
-
-                      <div>
-                        <small>
-                          Total
-                        </small>
-
-                        <strong>
-                          {money(
-                            fee.total
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <small>
-                          Paid
-                        </small>
-
-                        <strong>
-                          {money(
-                            fee.paid
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <small>
-                          Due
-                        </small>
-
-                        <strong>
-                          {money(
-                            fee.remaining
-                          )}
-                        </strong>
-                      </div>
-
-                    </div>
-
-                    <div className="fee-progress-area">
-
-                      <div className="fee-progress-text">
-
-                        <span>
-                          Payment Progress
-                        </span>
-
-                        <strong>
-                          {percent}%
-                        </strong>
-
-                      </div>
-
-                      <div className="fee-progress">
-
-                        <div
-                          style={{
-                            width:
-                              `${percent}%`,
-                          }}
-                        />
-
-                      </div>
-
-                    </div>
-
-                    <div className="fee-actions">
-
-                      <button
-                        className="add-payment-btn"
-                        disabled={
-                          fee.status ===
-                          "Paid"
-                        }
-                        onClick={() =>
-                          openFeePayment(
-                            student
-                          )
-                        }
-                      >
-                        {fee.status ===
-                        "Paid"
-                          ? "✓ Fully Paid"
-                          : "+ Add Payment"}
-                      </button>
-
-                      <button
-                        className="reset-fee-btn"
-                        onClick={() =>
-                          resetFee(
-                            student
-                          )
-                        }
-                      >
-                        Reset
-                      </button>
-
-                    </div>
-
-                    {fee.payments.length >
-                      0 && (
-
-                      <details className="payment-history">
-
-                        <summary>
-                          View Payment History (
-                          {
-                            fee.payments
-                              .length
-                          }
-                          )
-                        </summary>
-
-                        <div>
-
-                          {fee.payments
-                            .slice()
-                            .reverse()
-                            .map(
-                              (
-                                payment,
-                                i
-                              ) => (
-
-                                <div
-                                  className="payment-row"
-                                  key={i}
-                                >
-
-                                  <span>
-
-                                    {payment.note}
-
-                                    <small>
-                                      {
-                                        payment.date
-                                      }
-                                    </small>
-
-                                  </span>
-
-                                  <strong>
-                                    +
-                                    {money(
-                                      payment.amount
-                                    )}
-                                  </strong>
-
-                                </div>
-
-                              )
-                            )}
-
-                        </div>
-
-                      </details>
-
+                    {message.phone && (
+                      <p>
+                        <strong>Phone:</strong>{" "}
+                        {message.phone}
+                      </p>
                     )}
 
+                    <p>
+                      {message.message}
+                    </p>
+
+                    {message.date && (
+                      <small>
+                        {message.date}
+                      </small>
+                    )}
                   </div>
 
-                );
-              }
-            )}
-
-          </div>
-
-        )}
-
-      </section>
-
-      {/* STUDENT MANAGEMENT */}
-
-      <section className="student-management">
-
-        <div className="student-management-heading">
-
-          <div>
-
-            <h2>
-              👨‍🎓 Student Management
-            </h2>
-
-            <p>
-              Manage enrolled students
-            </p>
-
-          </div>
-
-          <div className="student-actions">
-
-            <button
-              className="add-student-btn"
-              onClick={() =>
-                setShowAddStudent(
-                  true
-                )
-              }
-            >
-              + Add Student
-            </button>
-
-            <button
-              className="export-btn"
-              onClick={
-                exportToExcel
-              }
-            >
-              📊 Export Excel
-            </button>
-
-            <button
-              className="clear-all-btn"
-              onClick={
-                clearAllStudents
-              }
-            >
-              🗑️ Clear All
-            </button>
-
-          </div>
-
-        </div>
-
-        <input
-          className="student-search"
-          placeholder="Search student, phone, email or course..."
-          value={search}
-          onChange={(e) =>
-            setSearch(
-              e.target.value
-            )
-          }
-        />
-
-        {filteredStudents.length ===
-        0 ? (
-
-          <div className="no-students">
-
-            <div>
-              👨‍🎓
-            </div>
-
-            <h3>
-              No Students Found
-            </h3>
-
-            <p>
-              Try another search or add a new student.
-            </p>
-
-          </div>
-
-        ) : (
-
-          <div className="student-grid">
-
-            {filteredStudents.map(
-              (student) => (
-
-                <div
-                  className="student-card"
-                  key={student.phone}
-                >
-
-                  <div className="student-avatar">
-
-                    {student.name
-                      .charAt(0)
-                      .toUpperCase()}
-
-                  </div>
-
-                  <h3>
-                    {student.name}
-                  </h3>
-
-                  <p>
-                    📧 {student.email}
-                  </p>
-
-                  <p>
-                    📱 {student.phone}
-                  </p>
-
-                  <p>
-                    📚 {student.course}
-                  </p>
-
-                  <small>
-                    📅 {student.date}
-                  </small>
-
-                  <div className="student-card-actions">
-
-                    <button
-                      className="view-btn"
-                      onClick={() =>
-                        setViewingStudent(
-                          student
-                        )
-                      }
-                    >
-                      👁️ View
-                    </button>
-
-                    <button
-                      className="edit-btn"
-                      onClick={() =>
-                        openEditStudent(
-                          student
-                        )
-                      }
-                    >
-                      ✏️ Edit
-                    </button>
-
-                    <button
-                      className="delete-btn"
-                      onClick={() =>
-                        deleteStudent(
-                          enrollments.findIndex(
-                            (item) =>
-                              item.phone ===
-                              student.phone
-                          )
-                        )
-                      }
-                    >
-                      🗑️ Delete
-                    </button>
-
-                  </div>
+                  <button
+                    className="danger-btn"
+                    onClick={() =>
+                      deleteMessage(index)
+                    }
+                  >
+                    Delete
+                  </button>
 
                 </div>
-
               )
             )}
 
           </div>
-
         )}
 
       </section>
 
-      {/* MESSAGES */}
+      {/* ================= VIEW STUDENT MODAL ================= */}
 
-      <section className="messages-section">
+      {viewingStudent && (
+        <div className="admin-modal">
 
-        <div className="messages-heading">
-
-          <div>
-
-            <h2>
-              📩 Contact Messages
-            </h2>
-
-            <p>
-              Messages received from website
-            </p>
-
-          </div>
-
-        </div>
-
-        <input
-          className="message-search"
-          placeholder="Search messages..."
-          value={messageSearch}
-          onChange={(e) =>
-            setMessageSearch(
-              e.target.value
-            )
-          }
-        />
-
-        {filteredMessages.length ===
-        0 ? (
-
-          <div className="messages-empty">
-
-            <div>
-              📩
-            </div>
-
-            <h3>
-              No Messages Found
-            </h3>
-
-          </div>
-
-        ) : (
-
-          <div className="messages-grid">
-
-            {filteredMessages.map(
-              (item, index) => {
-
-                const originalIndex =
-                  contactMessages.findIndex(
-                    (message) =>
-                      message ===
-                      item
-                  );
-
-                return (
-
-                  <div
-                    className="message-card"
-                    key={index}
-                  >
-
-                    <h3>
-                      {item.name}
-                    </h3>
-
-                    <p>
-                      📧 {item.email}
-                    </p>
-
-                    <p>
-                      📱 {item.phone}
-                    </p>
-
-                    <p className="message-preview">
-                      {item.message}
-                    </p>
-
-                    <small>
-                      📅 {item.date}
-                    </small>
-
-                    <div className="message-actions">
-
-                      <button
-                        className="view-btn"
-                        onClick={() =>
-                          setViewingMessage(
-                            item
-                          )
-                        }
-                      >
-                        👁️ View
-                      </button>
-
-                      <button
-                        className="delete-btn"
-                        onClick={() =>
-                          deleteMessage(
-                            originalIndex
-                          )
-                        }
-                      >
-                        🗑️ Delete
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                );
-              }
-            )}
-
-          </div>
-
-        )}
-
-      </section>
-
-      {/* ADD / EDIT COURSE MODAL */}
-
-      {showCourseModal && (
-
-        <div className="course-management-modal">
-
-          <div className="course-management-modal-content">
+          <div className="admin-modal-content">
 
             <button
-              className="course-modal-close"
+              className="modal-close"
               onClick={() =>
-                setShowCourseModal(
-                  false
-                )
+                setViewingStudent(null)
               }
             >
               ×
             </button>
 
-            <div className="course-modal-icon">
-              📚
+            <h2>Student Details</h2>
+
+            <div className="student-details">
+
+              <p>
+                <strong>Name:</strong>{" "}
+                {viewingStudent.name}
+              </p>
+
+              <p>
+                <strong>Email:</strong>{" "}
+                {viewingStudent.email}
+              </p>
+
+              <p>
+                <strong>Phone:</strong>{" "}
+                {viewingStudent.phone}
+              </p>
+
+              <p>
+                <strong>Course:</strong>{" "}
+                {viewingStudent.course}
+              </p>
+
+              <p>
+                <strong>Date:</strong>{" "}
+                {viewingStudent.date ||
+                  viewingStudent.created_at ||
+                  "-"}
+              </p>
+
+              <p>
+                <strong>Attendance:</strong>{" "}
+                {getAttendancePercentage(
+                  viewingStudent.id
+                )}
+                %
+              </p>
+
+              <p>
+                <strong>Total Fee:</strong>{" "}
+                ₹
+                {Number(
+                  fees[viewingStudent.id]
+                    ?.total || 0
+                ).toLocaleString()}
+              </p>
+
+              <p>
+                <strong>Paid Fee:</strong>{" "}
+                ₹
+                {Number(
+                  fees[viewingStudent.id]
+                    ?.paid || 0
+                ).toLocaleString()}
+              </p>
+
+              <p>
+                <strong>Remaining Fee:</strong>{" "}
+                ₹
+                {Number(
+                  fees[viewingStudent.id]
+                    ?.remaining || 0
+                ).toLocaleString()}
+              </p>
+
             </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ================= EDIT STUDENT MODAL ================= */}
+
+      {editingStudent && (
+        <div className="admin-modal">
+
+          <div className="admin-modal-content">
+
+            <button
+              className="modal-close"
+              onClick={() =>
+                setEditingStudent(null)
+              }
+            >
+              ×
+            </button>
+
+            <h2>Edit Student</h2>
+
+            <input
+              type="text"
+              placeholder="Student Name"
+              value={
+                editingStudent.name || ""
+              }
+              onChange={(e) =>
+                setEditingStudent({
+                  ...editingStudent,
+                  name: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={
+                editingStudent.email || ""
+              }
+              onChange={(e) =>
+                setEditingStudent({
+                  ...editingStudent,
+                  email: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="tel"
+              placeholder="Phone"
+              value={
+                editingStudent.phone || ""
+              }
+              onChange={(e) =>
+                setEditingStudent({
+                  ...editingStudent,
+                  phone: e.target.value
+                })
+              }
+            />
+
+            <select
+              value={
+                editingStudent.course || ""
+              }
+              onChange={(e) =>
+                setEditingStudent({
+                  ...editingStudent,
+                  course: e.target.value
+                })
+              }
+            >
+              <option value="">
+                Select Course
+              </option>
+
+              {courses.map((course) => (
+                <option
+                  key={course.id}
+                  value={course.name}
+                >
+                  {course.name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              className="save-btn"
+              onClick={saveEditedStudent}
+            >
+              Save Changes
+            </button>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ================= ADD STUDENT MODAL ================= */}
+
+      {showAddStudent && (
+        <div className="admin-modal">
+
+          <div className="admin-modal-content">
+
+            <button
+              className="modal-close"
+              onClick={() =>
+                setShowAddStudent(false)
+              }
+            >
+              ×
+            </button>
+
+            <h2>Add New Student</h2>
+
+            <input
+              type="text"
+              placeholder="Student Name"
+              value={newStudent.name}
+              onChange={(e) =>
+                setNewStudent({
+                  ...newStudent,
+                  name: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={newStudent.email}
+              onChange={(e) =>
+                setNewStudent({
+                  ...newStudent,
+                  email: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="tel"
+              placeholder="Phone Number"
+              value={newStudent.phone}
+              onChange={(e) =>
+                setNewStudent({
+                  ...newStudent,
+                  phone: e.target.value
+                })
+              }
+            />
+
+            <select
+              value={newStudent.course}
+              onChange={(e) =>
+                setNewStudent({
+                  ...newStudent,
+                  course: e.target.value
+                })
+              }
+            >
+
+              <option value="">
+                Select Course
+              </option>
+
+              {courses.map((course) => (
+                <option
+                  key={course.id}
+                  value={course.name}
+                >
+                  {course.name}
+                </option>
+              ))}
+
+            </select>
+
+            <button
+              className="save-btn"
+              onClick={handleAddStudent}
+            >
+              Add Student
+            </button>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ================= COURSE MODAL ================= */}
+
+      {showCourseModal && (
+        <div className="admin-modal">
+
+          <div className="admin-modal-content">
+
+            <button
+              className="modal-close"
+              onClick={() =>
+                setShowCourseModal(false)
+              }
+            >
+              ×
+            </button>
 
             <h2>
               {editingCourse
                 ? "Edit Course"
-                : "Add New Course"}
+                : "Add Course"}
             </h2>
 
-            <p>
-              Enter course information
-            </p>
+            <input
+              type="text"
+              placeholder="Course Name"
+              value={courseForm.name}
+              onChange={(e) =>
+                setCourseForm({
+                  ...courseForm,
+                  name: e.target.value
+                })
+              }
+            />
 
-            <form
-              className="course-management-form"
-              onSubmit={saveCourse}
-            >
+            <input
+              type="number"
+              placeholder="Course Fee"
+              value={courseForm.fee}
+              onChange={(e) =>
+                setCourseForm({
+                  ...courseForm,
+                  fee: e.target.value
+                })
+              }
+            />
 
-              <input
-                placeholder="Course Name"
-                value={courseName}
-                onChange={(e) =>
-                  setCourseName(
-                    e.target.value
-                  )
-                }
-              />
+            <input
+              type="text"
+              placeholder="Duration"
+              value={courseForm.duration}
+              onChange={(e) =>
+                setCourseForm({
+                  ...courseForm,
+                  duration: e.target.value
+                })
+              }
+            />
 
-              <textarea
-                placeholder="Course Description"
-                value={
-                  courseDescription
-                }
-                onChange={(e) =>
-                  setCourseDescription(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Course Fee"
-                value={courseFee}
-                onChange={(e) =>
-                  setCourseFee(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                placeholder="Duration"
-                value={
-                  courseDuration
-                }
-                onChange={(e) =>
-                  setCourseDuration(
-                    e.target.value
-                  )
-                }
-              />
-
-              <textarea
-                placeholder="Course Topics"
-                value={courseTopics}
-                onChange={(e) =>
-                  setCourseTopics(
-                    e.target.value
-                  )
-                }
-              />
-
-              <div className="course-form-actions">
-
-                <button
-                  type="button"
-                  className="cancel-course-btn"
-                  onClick={() =>
-                    setShowCourseModal(
-                      false
-                    )
-                  }
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="save-course-btn"
-                >
-                  {editingCourse
-                    ? "Update Course"
-                    : "Save Course"}
-                </button>
-
-              </div>
-
-            </form>
-
-          </div>
-
-        </div>
-
-      )}
-
-      {/* ADD STUDENT MODAL */}
-
-      {showAddStudent && (
-
-        <div className="add-student-modal">
-
-          <div className="add-student-modal-content">
+            <textarea
+              placeholder="Course Topics"
+              value={courseForm.topics}
+              onChange={(e) =>
+                setCourseForm({
+                  ...courseForm,
+                  topics: e.target.value
+                })
+              }
+            />
 
             <button
-              className="add-close-btn"
-              onClick={() =>
-                setShowAddStudent(
-                  false
-                )
-              }
+              className="save-btn"
+              onClick={saveCourse}
             >
-              ×
+              Save Course
             </button>
-
-            <div className="add-icon">
-              👨‍🎓
-            </div>
-
-            <h2>
-              Add New Student
-            </h2>
-
-            <p>
-              Enter student information
-            </p>
-
-            <form
-              className="add-student-form"
-              onSubmit={
-                handleAddStudent
-              }
-            >
-
-              <input
-                placeholder="Student Name"
-                value={newName}
-                onChange={(e) =>
-                  setNewName(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                type="email"
-                placeholder="Student Email"
-                value={newEmail}
-                onChange={(e) =>
-                  setNewEmail(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                type="tel"
-                placeholder="Phone Number"
-                value={newPhone}
-                onChange={(e) =>
-                  setNewPhone(
-                    e.target.value
-                  )
-                }
-              />
-
-              <select
-                value={newCourse}
-                onChange={(e) =>
-                  setNewCourse(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Select Course
-                </option>
-
-                {courses.map(
-                  (course) => (
-
-                    <option
-                      key={
-                        course.name
-                      }
-                      value={
-                        course.name
-                      }
-                    >
-                      {course.name}
-                    </option>
-
-                  )
-                )}
-
-              </select>
-
-              <div className="add-form-actions">
-
-                <button
-                  type="button"
-                  className="cancel-add-btn"
-                  onClick={() =>
-                    setShowAddStudent(
-                      false
-                    )
-                  }
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="save-add-btn"
-                >
-                  Save Student
-                </button>
-
-              </div>
-
-            </form>
 
           </div>
 
         </div>
-
       )}
 
-      {/* EDIT STUDENT MODAL */}
-
-      {editingStudent && (
-
-        <div className="view-modal">
-
-          <div className="view-modal-content">
-
-            <button
-              className="close-view-btn"
-              onClick={() =>
-                setEditingStudent(
-                  null
-                )
-              }
-            >
-              ×
-            </button>
-
-            <div className="big-student-avatar">
-              ✏️
-            </div>
-
-            <h2>
-              Edit Student
-            </h2>
-
-            <form
-              className="add-student-form"
-              onSubmit={
-                saveEditedStudent
-              }
-            >
-
-              <input
-                placeholder="Student Name"
-                value={editName}
-                onChange={(e) =>
-                  setEditName(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                type="email"
-                placeholder="Email"
-                value={editEmail}
-                onChange={(e) =>
-                  setEditEmail(
-                    e.target.value
-                  )
-                }
-              />
-
-              <input
-                type="tel"
-                placeholder="Phone"
-                value={editPhone}
-                onChange={(e) =>
-                  setEditPhone(
-                    e.target.value
-                  )
-                }
-              />
-
-              <select
-                value={editCourse}
-                onChange={(e) =>
-                  setEditCourse(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Select Course
-                </option>
-
-                {courses.map(
-                  (course) => (
-
-                    <option
-                      key={
-                        course.name
-                      }
-                      value={
-                        course.name
-                      }
-                    >
-                      {course.name}
-                    </option>
-
-                  )
-                )}
-
-              </select>
-
-              <div className="add-form-actions">
-
-                <button
-                  type="button"
-                  className="cancel-add-btn"
-                  onClick={() =>
-                    setEditingStudent(
-                      null
-                    )
-                  }
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="save-add-btn"
-                >
-                  Update Student
-                </button>
-
-              </div>
-
-            </form>
-
-          </div>
-
-        </div>
-
-      )}
-
-      {/* VIEW STUDENT */}
-
-      {viewingStudent && (
-
-        <div className="view-modal">
-
-          <div className="view-modal-content">
-
-            <button
-              className="close-view-btn"
-              onClick={() =>
-                setViewingStudent(
-                  null
-                )
-              }
-            >
-              ×
-            </button>
-
-            <div className="big-student-avatar">
-
-              {viewingStudent.name
-                .charAt(0)
-                .toUpperCase()}
-
-            </div>
-
-            <h2>
-              {viewingStudent.name}
-            </h2>
-
-            <div className="view-details">
-
-              <div className="view-detail-item">
-                <strong>
-                  📧 Email
-                </strong>
-                <span>
-                  {viewingStudent.email}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  📱 Phone
-                </strong>
-                <span>
-                  {viewingStudent.phone}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  📚 Course
-                </strong>
-                <span>
-                  {viewingStudent.course}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  📅 Enrollment Date
-                </strong>
-                <span>
-                  {viewingStudent.date}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  📊 Attendance
-                </strong>
-                <span>
-                  {
-                    getAttendancePercentage(
-                      viewingStudent
-                    )
-                  }
-                  %
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  💰 Fee Status
-                </strong>
-                <span>
-                  {
-                    getFeeData(
-                      viewingStudent
-                    ).status
-                  }
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  💵 Paid
-                </strong>
-                <span>
-                  {money(
-                    getFeeData(
-                      viewingStudent
-                    ).paid
-                  )}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  🧾 Remaining
-                </strong>
-                <span>
-                  {money(
-                    getFeeData(
-                      viewingStudent
-                    ).remaining
-                  )}
-                </span>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
-
-      {/* VIEW MESSAGE */}
-
-      {viewingMessage && (
-
-        <div className="view-modal">
-
-          <div className="view-modal-content">
-
-            <button
-              className="close-view-btn"
-              onClick={() =>
-                setViewingMessage(
-                  null
-                )
-              }
-            >
-              ×
-            </button>
-
-            <div className="big-student-avatar">
-              📩
-            </div>
-
-            <h2>
-              {viewingMessage.name}
-            </h2>
-
-            <div className="view-details">
-
-              <div className="view-detail-item">
-                <strong>
-                  📧 Email
-                </strong>
-
-                <span>
-                  {viewingMessage.email}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  📱 Phone
-                </strong>
-
-                <span>
-                  {viewingMessage.phone}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  📅 Date
-                </strong>
-
-                <span>
-                  {viewingMessage.date}
-                </span>
-              </div>
-
-              <div className="view-detail-item">
-                <strong>
-                  💬 Message
-                </strong>
-
-                <span>
-                  {viewingMessage.message}
-                </span>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
-
-      {/* FEE PAYMENT MODAL */}
+      {/* ================= FEE MODAL ================= */}
 
       {feeStudent && (
+        <div className="admin-modal">
 
-        <div className="view-modal">
-
-          <div className="view-modal-content">
+          <div className="admin-modal-content">
 
             <button
-              className="close-view-btn"
+              className="modal-close"
               onClick={() =>
                 setFeeStudent(null)
               }
@@ -2817,129 +1888,559 @@ function Admin() {
               ×
             </button>
 
-            <div className="big-student-avatar">
-              💰
-            </div>
-
             <h2>
-              Add Fee Payment
+              Fee Management
             </h2>
 
+            <h3>
+              {feeStudent.name}
+            </h3>
+
             <p>
-              {feeStudent.name} •{" "}
-              {feeStudent.course}
+              Course: {feeStudent.course}
             </p>
 
-            <div className="fee-payment-info">
+            <div className="fee-box">
 
-              <div>
-                <span>
-                  Total Fee
-                </span>
+              <p>
+                <strong>Total:</strong> ₹
+                {Number(
+                  fees[feeStudent.id]
+                    ?.total || 0
+                ).toLocaleString()}
+              </p>
 
-                <strong>
-                  {money(
-                    getFeeData(
-                      feeStudent
-                    ).total
-                  )}
-                </strong>
-              </div>
+              <p>
+                <strong>Paid:</strong> ₹
+                {Number(
+                  fees[feeStudent.id]
+                    ?.paid || 0
+                ).toLocaleString()}
+              </p>
 
-              <div>
-                <span>
-                  Already Paid
-                </span>
-
-                <strong>
-                  {money(
-                    getFeeData(
-                      feeStudent
-                    ).paid
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  Remaining
-                </span>
-
-                <strong>
-                  {money(
-                    getFeeData(
-                      feeStudent
-                    ).remaining
-                  )}
-                </strong>
-              </div>
+              <p>
+                <strong>Remaining:</strong> ₹
+                {Number(
+                  fees[feeStudent.id]
+                    ?.remaining || 0
+                ).toLocaleString()}
+              </p>
 
             </div>
 
-            <form
-              className="fee-payment-form"
-              onSubmit={
-                addPayment
+            <input
+              type="number"
+              placeholder="Enter payment amount"
+              value={feeAmount}
+              onChange={(e) =>
+                setFeeAmount(e.target.value)
               }
+            />
+
+            <button
+              className="save-btn"
+              onClick={addFeePayment}
             >
+              Add Payment
+            </button>
 
-              <input
-                type="number"
-                min="1"
-                placeholder="Payment Amount"
-                value={
-                  paymentAmount
-                }
-                onChange={(e) =>
-                  setPaymentAmount(
-                    e.target.value
+            <h3>
+              Payment History
+            </h3>
+
+            {(
+              fees[feeStudent.id]?.history ||
+              []
+            ).length === 0 ? (
+              <p>
+                No payments yet.
+              </p>
+            ) : (
+              <div className="payment-history">
+
+                {fees[
+                  feeStudent.id
+                ].history.map(
+                  (payment, index) => (
+                    <div
+                      key={index}
+                    >
+                      ₹
+                      {Number(
+                        payment.amount
+                      ).toLocaleString()}{" "}
+                      -{" "}
+                      {payment.date}
+                    </div>
                   )
-                }
-              />
-
-              <input
-                type="text"
-                placeholder="Payment Note (e.g. Installment 1)"
-                value={
-                  paymentNote
-                }
-                onChange={(e) =>
-                  setPaymentNote(
-                    e.target.value
-                  )
-                }
-              />
-
-              <div>
-
-                <button
-                  type="button"
-                  className="cancel-add-btn"
-                  onClick={() =>
-                    setFeeStudent(
-                      null
-                    )
-                  }
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="save-add-btn"
-                >
-                  💵 Save Payment
-                </button>
+                )}
 
               </div>
-
-            </form>
+            )}
 
           </div>
 
         </div>
-
       )}
+
+      {/* ================= CSS ================= */}
+
+      <style>{`
+
+        * {
+          box-sizing: border-box;
+        }
+
+        .admin-page {
+          min-height: 100vh;
+          background: #f5f7fb;
+          color: #1f2937;
+          font-family: Arial, sans-serif;
+          padding-bottom: 50px;
+        }
+
+        .admin-header {
+          background: linear-gradient(
+            135deg,
+            #0f4c81,
+            #1769aa
+          );
+          color: white;
+          padding: 25px 35px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+
+        .admin-header h1 {
+          margin: 0;
+          font-size: 28px;
+        }
+
+        .admin-header p {
+          margin: 6px 0 0;
+          opacity: 0.9;
+        }
+
+        .admin-header-buttons {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        button {
+          border: none;
+          border-radius: 7px;
+          padding: 10px 15px;
+          cursor: pointer;
+          background: #1769aa;
+          color: white;
+          font-weight: 600;
+          transition: 0.2s;
+        }
+
+        button:hover {
+          opacity: 0.9;
+          transform: translateY(-1px);
+        }
+
+        .logout-btn {
+          background: #dc2626;
+        }
+
+        .danger-btn {
+          background: #dc2626 !important;
+        }
+
+        .save-btn {
+          width: 100%;
+          margin-top: 10px;
+          background: #15803d;
+        }
+
+        .admin-stats {
+          display: grid;
+          grid-template-columns:
+            repeat(auto-fit, minmax(180px, 1fr));
+          gap: 18px;
+          padding: 25px 35px;
+        }
+
+        .admin-stat-card {
+          background: white;
+          border-radius: 14px;
+          padding: 22px;
+          box-shadow:
+            0 5px 20px rgba(0,0,0,0.07);
+        }
+
+        .admin-stat-card h3 {
+          margin: 0 0 10px;
+          color: #64748b;
+          font-size: 15px;
+        }
+
+        .admin-stat-card strong {
+          font-size: 28px;
+          color: #0f4c81;
+        }
+
+        .admin-section {
+          background: white;
+          margin: 0 35px 25px;
+          padding: 25px;
+          border-radius: 15px;
+          box-shadow:
+            0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 20px;
+          flex-wrap: wrap;
+          margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+          margin: 0;
+          color: #0f4c81;
+        }
+
+        .section-header p {
+          margin: 5px 0 0;
+          color: #64748b;
+        }
+
+        .section-actions {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .admin-search {
+          width: 100%;
+          padding: 13px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          font-size: 15px;
+          outline: none;
+        }
+
+        .admin-search:focus {
+          border-color: #1769aa;
+        }
+
+        .table-wrapper {
+          width: 100%;
+          overflow-x: auto;
+        }
+
+        .admin-table {
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 950px;
+        }
+
+        .admin-table th,
+        .admin-table td {
+          padding: 13px 12px;
+          border-bottom: 1px solid #e5e7eb;
+          text-align: left;
+          vertical-align: middle;
+        }
+
+        .admin-table th {
+          background: #eef5fb;
+          color: #0f4c81;
+        }
+
+        .admin-table tr:hover {
+          background: #f8fafc;
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 40px 20px;
+          color: #64748b;
+          background: #f8fafc;
+          border-radius: 10px;
+        }
+
+        .course-admin-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(auto-fit, minmax(250px, 1fr));
+          gap: 18px;
+        }
+
+        .course-admin-card {
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          padding: 20px;
+        }
+
+        .course-admin-card h3 {
+          margin-top: 0;
+          color: #0f4c81;
+        }
+
+        .course-count-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(auto-fit, minmax(180px, 1fr));
+          gap: 15px;
+        }
+
+        .course-count-card {
+          padding: 20px;
+          border-radius: 12px;
+          background: #f0f7ff;
+          text-align: center;
+        }
+
+        .course-count-card h3 {
+          margin: 0 0 10px;
+        }
+
+        .course-count-card strong {
+          font-size: 30px;
+          color: #1769aa;
+        }
+
+        .course-count-card p {
+          margin-bottom: 0;
+        }
+
+        .attendance-buttons {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+
+        .active-present {
+          background: #15803d !important;
+        }
+
+        .active-absent {
+          background: #dc2626 !important;
+        }
+
+        .status-paid {
+          background: #dcfce7;
+          color: #166534;
+          padding: 5px 10px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .status-pending {
+          background: #fef3c7;
+          color: #92400e;
+          padding: 5px 10px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .message-list {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .message-card {
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          padding: 18px;
+          display: flex;
+          justify-content: space-between;
+          gap: 20px;
+        }
+
+        .message-card h3 {
+          margin-top: 0;
+          color: #0f4c81;
+        }
+
+        .message-card p {
+          margin: 8px 0;
+        }
+
+        .message-card small {
+          color: #64748b;
+        }
+
+        .admin-modal {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.55);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+          z-index: 9999;
+          overflow-y: auto;
+        }
+
+        .admin-modal-content {
+          width: 100%;
+          max-width: 560px;
+          background: white;
+          border-radius: 15px;
+          padding: 25px;
+          position: relative;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+
+        .admin-modal-content h2 {
+          margin-top: 0;
+          color: #0f4c81;
+        }
+
+        .admin-modal-content h3 {
+          color: #1769aa;
+        }
+
+        .admin-modal-content input,
+        .admin-modal-content select,
+        .admin-modal-content textarea {
+          width: 100%;
+          padding: 12px;
+          margin-bottom: 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          font-size: 15px;
+          font-family: inherit;
+        }
+
+        .admin-modal-content textarea {
+          min-height: 110px;
+          resize: vertical;
+        }
+
+        .modal-close {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: #dc2626;
+          font-size: 22px;
+          padding: 0;
+        }
+
+        .student-details {
+          background: #f8fafc;
+          padding: 18px;
+          border-radius: 10px;
+        }
+
+        .student-details p {
+          margin: 10px 0;
+        }
+
+        .fee-box {
+          background: #f8fafc;
+          padding: 15px;
+          border-radius: 10px;
+          margin-bottom: 15px;
+        }
+
+        .fee-box p {
+          margin: 8px 0;
+        }
+
+        .payment-history {
+          margin-top: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .payment-history div {
+          background: #f8fafc;
+          padding: 10px;
+          border-radius: 7px;
+        }
+
+        @media (max-width: 768px) {
+
+          .admin-header {
+            padding: 20px;
+          }
+
+          .admin-header h1 {
+            font-size: 23px;
+          }
+
+          .admin-stats {
+            padding: 18px;
+            grid-template-columns:
+              repeat(2, 1fr);
+          }
+
+          .admin-section {
+            margin: 0 18px 18px;
+            padding: 18px;
+          }
+
+          .admin-stat-card {
+            padding: 18px;
+          }
+
+          .admin-stat-card strong {
+            font-size: 23px;
+          }
+
+          .section-actions {
+            width: 100%;
+          }
+
+          .section-actions button {
+            flex: 1;
+          }
+
+          .message-card {
+            flex-direction: column;
+          }
+        }
+
+        @media (max-width: 480px) {
+
+          .admin-stats {
+            grid-template-columns: 1fr;
+          }
+
+          .admin-section {
+            margin: 0 10px 15px;
+            padding: 15px;
+          }
+
+          .admin-header-buttons {
+            width: 100%;
+          }
+
+          .admin-header-buttons button {
+            flex: 1;
+          }
+
+        }
+
+      `}</style>
 
     </div>
   );
