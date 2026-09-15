@@ -5426,3 +5426,689 @@ button:hover,.btn:hover{filter:brightness(1.04);}
   }
 
 }
+/* =========================================================
+   COURSE MODAL - ALL SCREEN RESPONSIVE FIX
+   Desktop + Laptop + Tablet + Mobile
+   ========================================================= */
+
+/* Main overlay */
+.modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+
+  padding: 24px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  box-sizing: border-box !important;
+
+  -webkit-overflow-scrolling: touch !important;
+  z-index: 99999 !important;
+}
+
+
+/* =========================================================
+   MODAL BOX
+   ========================================================= */
+
+.modal-content {
+  position: relative !important;
+
+  width: 100% !important;
+  max-width: 720px !important;
+
+  height: auto !important;
+  max-height: calc(100dvh - 48px) !important;
+
+  margin: auto !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  box-sizing: border-box !important;
+
+  -webkit-overflow-scrolling: touch !important;
+}
+
+
+/* =========================================================
+   COURSE DETAILS
+   ========================================================= */
+
+.course-details {
+  width: 100% !important;
+
+  height: auto !important;
+  max-height: none !important;
+
+  overflow: visible !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Every details box */
+.course-details > div {
+  width: 100% !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+
+  max-width: 100% !important;
+
+  box-sizing: border-box !important;
+
+  overflow: visible !important;
+}
+
+
+/* =========================================================
+   TEXT FIX
+   ========================================================= */
+
+.modal-content h1,
+.modal-content h2,
+.modal-content h3,
+.modal-content h4,
+.modal-content p,
+.modal-content span {
+  max-width: 100% !important;
+
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+}
+
+
+/* =========================================================
+   BUTTON AREA
+   ========================================================= */
+
+.modal-content button {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+
+/* Enroll button should never be cut */
+.modal-content .enroll-btn,
+.modal-content .enroll-button {
+  width: 100% !important;
+
+  min-height: 52px !important;
+
+  margin-bottom: 8px !important;
+}
+
+
+/* =========================================================
+   FORM FIX
+   ========================================================= */
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+  width: 100% !important;
+  max-width: 100% !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1200px) {
+
+  .modal-overlay {
+    padding: 40px !important;
+  }
+
+  .modal-content {
+    max-width: 760px !important;
+    max-height: calc(100dvh - 80px) !important;
+  }
+
+}
+
+
+/* =========================================================
+   LAPTOP
+   ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1199px) {
+
+  .modal-overlay {
+    padding: 30px !important;
+  }
+
+  .modal-content {
+    width: min(700px, 100%) !important;
+
+    max-height: calc(100dvh - 60px) !important;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (min-width: 481px) and (max-width: 768px) {
+
+  .modal-overlay {
+    padding: 20px !important;
+
+    align-items: center !important;
+  }
+
+  .modal-content {
+    width: 100% !important;
+    max-width: 650px !important;
+
+    max-height: calc(100dvh - 40px) !important;
+
+    border-radius: 22px !important;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .modal-overlay {
+    padding: 10px !important;
+
+    align-items: flex-start !important;
+  }
+
+  .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    max-height: calc(100dvh - 20px) !important;
+
+    margin: 0 auto !important;
+
+    border-radius: 20px !important;
+  }
+
+  .course-details {
+    width: 100% !important;
+
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .course-details > div {
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .modal-overlay {
+    padding: 6px !important;
+  }
+
+  .modal-content {
+    max-height: calc(100dvh - 12px) !important;
+
+    border-radius: 16px !important;
+  }
+
+}
+
+
+/* =========================================================
+   PAGE SCROLL FIX
+   ========================================================= */
+
+html,
+body,
+#root {
+  width: 100% !important;
+  min-height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html,
+body {
+  overflow-x: hidden !important;
+}
+
+body {
+  overflow-y: auto !important;
+
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#root {
+  overflow: visible !important;
+}
+
+
+/* =========================================================
+   IMPORTANT:
+   NEVER CLIP MODAL CONTENT
+   ========================================================= */
+
+.modal-overlay *,
+.modal-content * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* =========================================================
+   FINAL COURSE MODAL FIX
+   Popup must come OUTSIDE the course card
+   Works on Desktop + Laptop + Tablet + Mobile
+   ========================================================= */
+
+
+/* COURSE SECTION MUST NOT CLIP MODAL */
+.courses:has(.course-modal),
+.course-container:has(.course-modal),
+.course-card:has(.course-modal) {
+  overflow: visible !important;
+}
+
+
+/* REMOVE CARD TRANSFORM WHILE MODAL IS OPEN */
+.course-card:has(.course-modal) {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  contain: none !important;
+}
+
+
+/* =========================================================
+   FULL SCREEN MODAL OVERLAY
+   ========================================================= */
+
+.course-modal {
+  position: fixed !important;
+
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+
+  margin: 0 !important;
+  padding: 24px !important;
+
+  display: flex !important;
+
+  align-items: flex-start !important;
+  justify-content: center !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  box-sizing: border-box !important;
+
+  z-index: 999999 !important;
+
+  -webkit-overflow-scrolling: touch !important;
+}
+
+
+/* =========================================================
+   MODAL CONTENT
+   ========================================================= */
+
+.course-modal .modal-content {
+  position: relative !important;
+
+  width: 100% !important;
+  max-width: 650px !important;
+
+  min-width: 0 !important;
+
+  height: auto !important;
+
+  max-height: calc(100dvh - 48px) !important;
+
+  margin: 0 auto !important;
+
+  padding: 32px !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  box-sizing: border-box !important;
+
+  flex-shrink: 0 !important;
+
+  border-radius: 24px !important;
+
+  background: #ffffff !important;
+}
+
+
+/* =========================================================
+   ALL MODAL CONTENT
+   ========================================================= */
+
+.course-modal .modal-content * {
+  box-sizing: border-box !important;
+
+  max-width: 100% !important;
+}
+
+
+/* =========================================================
+   COURSE INFORMATION
+   ========================================================= */
+
+.course-modal .course-info {
+  width: 100% !important;
+
+  height: auto !important;
+
+  min-height: 0 !important;
+
+  overflow: visible !important;
+
+  margin-top: 20px !important;
+
+  text-align: left !important;
+}
+
+
+.course-modal .course-info div {
+  width: 100% !important;
+
+  height: auto !important;
+
+  min-height: 0 !important;
+
+  margin-bottom: 14px !important;
+
+  padding: 16px !important;
+
+  overflow: visible !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   TEXT
+   ========================================================= */
+
+.course-modal h2 {
+  line-height: 1.3 !important;
+
+  overflow-wrap: anywhere !important;
+
+  word-break: normal !important;
+}
+
+
+.course-modal p,
+.course-modal strong,
+.course-modal span {
+  overflow-wrap: anywhere !important;
+
+  word-break: normal !important;
+}
+
+
+/* =========================================================
+   ENROLL BUTTON
+   ========================================================= */
+
+.course-modal .enroll-btn {
+  width: 100% !important;
+
+  max-width: 100% !important;
+
+  min-height: 54px !important;
+
+  margin-top: 18px !important;
+
+  margin-bottom: 8px !important;
+
+  display: block !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   ENROLLMENT FORM
+   ========================================================= */
+
+.course-modal .enroll-form {
+  width: 100% !important;
+
+  max-width: 100% !important;
+
+  height: auto !important;
+
+  overflow: visible !important;
+}
+
+
+.course-modal .enroll-form input,
+.course-modal .enroll-form textarea,
+.course-modal .enroll-form select {
+  width: 100% !important;
+
+  max-width: 100% !important;
+
+  box-sizing: border-box !important;
+}
+
+
+.course-modal .submit-enroll {
+  width: 100% !important;
+
+  max-width: 100% !important;
+
+  min-height: 54px !important;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1200px) {
+
+  .course-modal {
+    padding: 40px !important;
+  }
+
+  .course-modal .modal-content {
+    max-width: 700px !important;
+
+    max-height: calc(100dvh - 80px) !important;
+
+    padding: 36px !important;
+  }
+
+}
+
+
+/* =========================================================
+   LAPTOP
+   ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1199px) {
+
+  .course-modal {
+    padding: 30px !important;
+  }
+
+  .course-modal .modal-content {
+    max-width: 650px !important;
+
+    max-height: calc(100dvh - 60px) !important;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (min-width: 481px) and (max-width: 768px) {
+
+  .course-modal {
+    padding: 18px !important;
+
+    align-items: flex-start !important;
+  }
+
+  .course-modal .modal-content {
+    width: 100% !important;
+
+    max-width: 620px !important;
+
+    max-height: calc(100dvh - 36px) !important;
+
+    padding: 28px 22px !important;
+
+    border-radius: 22px !important;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .course-modal {
+    padding: 10px !important;
+
+    align-items: flex-start !important;
+  }
+
+  .course-modal .modal-content {
+    width: 100% !important;
+
+    max-width: 100% !important;
+
+    max-height: calc(100dvh - 20px) !important;
+
+    padding: 26px 16px 20px !important;
+
+    border-radius: 20px !important;
+  }
+
+  .course-modal .modal-content h2 {
+    font-size: 23px !important;
+
+    line-height: 1.3 !important;
+
+    padding-right: 30px !important;
+  }
+
+  .course-modal .course-info div {
+    padding: 14px !important;
+
+    margin-bottom: 10px !important;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .course-modal {
+    padding: 6px !important;
+  }
+
+  .course-modal .modal-content {
+    max-height: calc(100dvh - 12px) !important;
+
+    padding: 23px 13px 17px !important;
+
+    border-radius: 17px !important;
+  }
+
+}
+
+
+/* =========================================================
+   PREVENT PAGE ELEMENTS FROM COMING ABOVE MODAL
+   ========================================================= */
+
+.course-modal,
+.course-modal * {
+  z-index: auto;
+}
+
+.course-modal {
+  z-index: 999999 !important;
+}
+
+
+/* =========================================================
+   IMPORTANT: NORMAL PAGE SCROLL
+   ========================================================= */
+
+html,
+body,
+#root {
+  width: 100% !important;
+
+  min-height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html,
+body {
+  overflow-x: hidden !important;
+}
+
+body {
+  overflow-y: auto !important;
+
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#root {
+  overflow: visible !important;
+}
