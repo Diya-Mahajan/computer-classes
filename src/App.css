@@ -6112,3 +6112,16 @@ body {
 #root {
   overflow: visible !important;
 }
+/* FIXED NAVBAR */
+.navbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 99999 !important;
+}
+
+/* Prevent content from hiding behind navbar */
+body {
+  padding-top: 0 !important;
+}
