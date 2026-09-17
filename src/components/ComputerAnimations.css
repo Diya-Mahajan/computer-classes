@@ -1,0 +1,712 @@
+.computer-animation-section {
+  position: relative;
+  padding: 110px 5% 90px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 140, 255, 0.10), transparent 35%),
+    radial-gradient(circle at 80% 80%, rgba(100, 70, 255, 0.10), transparent 35%),
+    #f7faff;
+  overflow: hidden;
+}
+
+.animation-heading {
+  max-width: 850px;
+  margin: 0 auto 60px;
+  text-align: center;
+}
+
+.animation-badge {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: 50px;
+  background: rgba(11, 99, 246, 0.10);
+  color: #0b63f6;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+}
+
+.animation-heading h2 {
+  margin: 0;
+  color: #071426;
+  font-size: clamp(32px, 5vw, 55px);
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.animation-heading h2 span {
+  color: #0b63f6;
+}
+
+.animation-heading p {
+  max-width: 680px;
+  margin: 20px auto 0;
+  color: #607087;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* Main wrapper */
+
+.computer-animation-wrapper {
+  position: relative;
+  max-width: 1150px;
+  min-height: 650px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Computer */
+
+.animated-computer {
+  position: relative;
+  width: min(700px, 70vw);
+  z-index: 5;
+  animation: computerFloat 5s ease-in-out infinite;
+}
+
+.computer-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 12px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #172b46, #071426);
+  border: 2px solid rgba(11, 99, 246, 0.25);
+  box-shadow:
+    0 35px 80px rgba(7, 20, 38, 0.22),
+    0 0 45px rgba(11, 99, 246, 0.12);
+}
+
+/* Screen top */
+
+.screen-topbar {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  color: white;
+  font-size: 11px;
+}
+
+.screen-title {
+  margin-left: 10px;
+  opacity: 0.7;
+  font-weight: 700;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: block;
+}
+
+.dot.red {
+  background: #ff5f57;
+}
+
+.dot.yellow {
+  background: #ffbd2e;
+}
+
+.dot.green {
+  background: #28c840;
+}
+
+/* Screen content */
+
+.screen-content {
+  position: relative;
+  height: calc(100% - 35px);
+  overflow: hidden;
+  border-radius: 15px;
+  background: #eef4fb;
+}
+
+/* Windows */
+
+.app-window {
+  position: absolute;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Word */
+
+.word-window {
+  width: 65%;
+  height: 72%;
+  left: 5%;
+  top: 7%;
+  z-index: 3;
+  animation: wordMove 6s ease-in-out infinite;
+}
+
+.word-header {
+  background: #185abd;
+}
+
+.word-header strong {
+  font-size: 20px;
+}
+
+.app-header {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  color: white;
+  font-size: 12px;
+}
+
+.word-toolbar {
+  display: flex;
+  gap: 17px;
+  padding: 8px 13px;
+  border-bottom: 1px solid #ddd;
+  color: #444;
+  font-size: 12px;
+}
+
+.word-page {
+  padding: 20px;
+}
+
+.word-page h3 {
+  margin: 0 0 15px;
+  color: #222;
+  font-size: 18px;
+}
+
+.typing-line {
+  color: #444;
+  font-size: 12px;
+  min-height: 20px;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 15px;
+  margin-left: 3px;
+  vertical-align: middle;
+  background: #185abd;
+  animation: blink 0.8s infinite;
+}
+
+.fake-line {
+  width: 85%;
+  height: 7px;
+  margin-top: 13px;
+  border-radius: 5px;
+  background: #dbe4f0;
+}
+
+.fake-line.short {
+  width: 55%;
+}
+
+/* Excel */
+
+.excel-window {
+  width: 55%;
+  height: 60%;
+  right: 4%;
+  bottom: 5%;
+  z-index: 4;
+  animation: excelMove 6s ease-in-out infinite;
+}
+
+.excel-header {
+  background: #107c41;
+}
+
+.excel-header strong {
+  font-size: 17px;
+}
+
+.excel-grid {
+  display: grid;
+  grid-template-columns: 30px repeat(3, 1fr);
+  font-size: 9px;
+}
+
+.excel-grid > div {
+  min-height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #d8e0e8;
+  border-bottom: 1px solid #d8e0e8;
+  color: #45505d;
+}
+
+.excel-grid > div:nth-child(-n + 4) {
+  background: #edf5f0;
+  font-weight: 800;
+}
+
+.excel-cell {
+  justify-content: flex-start !important;
+  padding-left: 8px;
+}
+
+.excel-cell.data {
+  animation: cellPulse 2s ease-in-out infinite;
+}
+
+/* Coding */
+
+.code-window {
+  width: 48%;
+  height: 55%;
+  right: 25%;
+  top: 15%;
+  z-index: 2;
+  opacity: 0.95;
+  animation: codeMove 7s ease-in-out infinite;
+}
+
+.code-header {
+  background: #20252b;
+}
+
+.code-content {
+  padding: 15px;
+  background: #11161c;
+  color: #d9e2ec;
+  height: calc(100% - 38px);
+  font-family: Consolas, monospace;
+  font-size: 10px;
+  line-height: 2;
+}
+
+.code-number {
+  color: #687789;
+  margin-right: 10px;
+}
+
+.code-purple {
+  color: #c586c0;
+}
+
+.code-blue {
+  color: #9cdcfe;
+}
+
+.code-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  background: #ffffff;
+  animation: blink 0.7s infinite;
+}
+
+/* Stand */
+
+.computer-stand {
+  width: 115px;
+  height: 75px;
+  margin: -2px auto 0;
+  background: linear-gradient(90deg, #9ca9b8, #e2e8ef, #9ca9b8);
+  clip-path: polygon(35% 0, 65% 0, 78% 100%, 22% 100%);
+}
+
+.computer-base {
+  width: 260px;
+  height: 18px;
+  margin: -2px auto 0;
+  border-radius: 50%;
+  background: #9aa8b7;
+  box-shadow: 0 12px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* Keyboard */
+
+.animated-keyboard {
+  width: 320px;
+  max-width: 70%;
+  margin: 15px auto 0;
+  padding: 13px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #d7dfe8, #aab7c5);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.13);
+  transform: perspective(300px) rotateX(18deg);
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.keyboard-row span {
+  flex: 1;
+  height: 11px;
+  border-radius: 3px;
+  background: #f8fafc;
+  box-shadow: inset 0 -2px 2px rgba(0, 0, 0, 0.12);
+  animation: keyPress 2s infinite;
+}
+
+.keyboard-row span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.keyboard-row span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.keyboard-row span:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+.keyboard-row span:nth-child(5) {
+  animation-delay: 0.6s;
+}
+
+.keyboard-row span:nth-child(6) {
+  animation-delay: 0.75s;
+}
+
+.keyboard-row span:nth-child(7) {
+  animation-delay: 0.9s;
+}
+
+.space-key {
+  flex: 4 !important;
+}
+
+/* Floating cards */
+
+.floating-skill {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 17px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(11, 99, 246, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(7, 20, 38, 0.12);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  animation: cardFloat 4s ease-in-out infinite;
+}
+
+.floating-skill strong {
+  display: block;
+  color: #071426;
+  font-size: 13px;
+}
+
+.floating-skill small {
+  display: block;
+  color: #718096;
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.skill-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: #0b63f6;
+  color: white;
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.skill-word {
+  left: 0;
+  top: 18%;
+}
+
+.skill-excel {
+  right: 0;
+  top: 27%;
+  animation-delay: 0.7s;
+}
+
+.skill-code {
+  left: 3%;
+  bottom: 18%;
+  animation-delay: 1.2s;
+}
+
+.skill-web {
+  right: 2%;
+  bottom: 13%;
+  animation-delay: 1.8s;
+}
+
+/* Bottom */
+
+.animation-bottom-text {
+  max-width: 800px;
+  margin: 20px auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.animation-bottom-text div {
+  padding: 18px;
+  border-radius: 15px;
+  background: white;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(7, 20, 38, 0.07);
+}
+
+.animation-bottom-text strong {
+  display: block;
+  color: #0b63f6;
+  font-size: 12px;
+}
+
+.animation-bottom-text span {
+  display: block;
+  margin-top: 5px;
+  color: #071426;
+  font-weight: 800;
+}
+
+/* Animations */
+
+@keyframes computerFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes wordMove {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(-7px, -5px);
+  }
+}
+
+@keyframes excelMove {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(7px, 5px);
+  }
+}
+
+@keyframes codeMove {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(5px, -7px);
+  }
+}
+
+@keyframes cellPulse {
+  0%, 100% {
+    background: white;
+  }
+
+  50% {
+    background: #e5f5ec;
+  }
+}
+
+@keyframes keyPress {
+  0%, 80%, 100% {
+    transform: translateY(0);
+  }
+
+  85% {
+    transform: translateY(2px);
+  }
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes blink {
+  0%, 45% {
+    opacity: 1;
+  }
+
+  46%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .computer-animation-wrapper {
+    min-height: 600px;
+  }
+
+  .animated-computer {
+    width: 72%;
+  }
+
+  .floating-skill {
+    padding: 10px 12px;
+  }
+
+  .skill-word {
+    left: 1%;
+  }
+
+  .skill-excel {
+    right: 1%;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .computer-animation-section {
+    padding: 75px 5% 65px;
+  }
+
+  .animation-heading {
+    margin-bottom: 35px;
+  }
+
+  .animation-heading p {
+    font-size: 14px;
+  }
+
+  .computer-animation-wrapper {
+    min-height: 570px;
+  }
+
+  .animated-computer {
+    width: 94%;
+  }
+
+  .computer-screen {
+    border-radius: 16px;
+    padding: 7px;
+  }
+
+  .screen-topbar {
+    height: 25px;
+    font-size: 8px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .screen-title {
+    margin-left: 4px;
+  }
+
+  .word-window {
+    width: 68%;
+  }
+
+  .excel-window {
+    width: 60%;
+  }
+
+  .code-window {
+    width: 50%;
+  }
+
+  .floating-skill {
+    padding: 8px 10px;
+    gap: 7px;
+    border-radius: 12px;
+  }
+
+  .floating-skill strong {
+    font-size: 10px;
+  }
+
+  .floating-skill small {
+    font-size: 8px;
+  }
+
+  .skill-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+
+  .skill-word {
+    left: 0;
+    top: 5%;
+  }
+
+  .skill-excel {
+    right: 0;
+    top: 17%;
+  }
+
+  .skill-code {
+    left: 0;
+    bottom: 17%;
+  }
+
+  .skill-web {
+    right: 0;
+    bottom: 10%;
+  }
+
+  .animation-bottom-text {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .animation-bottom-text div {
+    padding: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .computer-animation-wrapper {
+    min-height: 500px;
+  }
+
+  .animated-keyboard {
+    width: 250px;
+  }
+
+  .floating-skill small {
+    display: none;
+  }
+
+  .floating-skill {
+    padding: 7px;
+  }
+}

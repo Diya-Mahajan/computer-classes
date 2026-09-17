@@ -1,3 +1,5 @@
+import HomeHeroAnimation from "./components/HomeHeroAnimation";
+import ComputerAnimations from "./components/ComputerAnimations";
 import { useState } from "react";
 import "./App.css";
 
@@ -354,7 +356,7 @@ function App() {
           </button>
 
         </div>
-
+<HomeHeroAnimation />
       </section>
 
       {/* =========================
@@ -399,7 +401,7 @@ function App() {
         </div>
 
       </section>
-
+<ComputerAnimations />
       {/* =========================
           ABOUT
       ========================= */}
