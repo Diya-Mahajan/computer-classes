@@ -336,17 +336,17 @@ function App() {
 
           <div className="hero-highlights">
             <div>
-              <strong>10+</strong>
+              <strong><font color="red">10+</font></strong>
               <span>Career Courses</span>
             </div>
 
             <div>
-              <strong>Practical</strong>
+              <strong><font color="red">Practical</font></strong>
               <span>Learning Approach</span>
             </div>
 
             <div>
-              <strong>Project</strong>
+              <strong><font color="red">Project</font></strong>
               <span>Based Training</span>
             </div>
           </div>
