@@ -1,9 +1,8 @@
-import HomeHeroAnimation from "./components/HomeHeroAnimation";
-import ComputerAnimations from "./components/ComputerAnimations";
 import { useState } from "react";
 import "./App.css";
 
 import CourseCard from "./components/CourseCard";
+import HomeHeroAnimation from "./components/HomeHeroAnimation";
 import Admin from "./Admin";
 import AdminLogin from "./AdminLogin";
 
@@ -308,6 +307,7 @@ function App() {
 
       </nav>
 
+
       {/* =========================
           HERO
       ========================= */}
@@ -329,26 +329,29 @@ function App() {
           <p>
             Build practical and job-oriented computer skills with
             structured training in programming, web development,
-            accounting, designing, office tools and digital technologies.
-            Learn step by step, practice regularly and work on projects
-            that help you become more confident with technology.
+            accounting, designing, office tools and digital
+            technologies. Learn step by step, practice regularly
+            and work on projects that help you become more
+            confident with technology.
           </p>
 
           <div className="hero-highlights">
+
             <div>
-              <strong><font color="red">10+</font></strong>
+              <strong>10+</strong>
               <span>Career Courses</span>
             </div>
 
             <div>
-              <strong><font color="red">Practical</font></strong>
+              <strong>Practical</strong>
               <span>Learning Approach</span>
             </div>
 
             <div>
-              <strong><font color="red">Project</font></strong>
+              <strong>Project</strong>
               <span>Based Training</span>
             </div>
+
           </div>
 
           <button onClick={handleJoinNow}>
@@ -356,8 +359,11 @@ function App() {
           </button>
 
         </div>
-<HomeHeroAnimation />
+
+        <HomeHeroAnimation />
+
       </section>
+
 
       {/* =========================
           COURSES
@@ -377,10 +383,11 @@ function App() {
           <h2>Explore Our Courses</h2>
 
           <p>
-            Choose from carefully structured computer courses designed
-            for beginners, students and learners who want useful
-            practical skills. Every course focuses on concepts,
-            hands-on practice and real-world applications.
+            Choose from carefully structured computer courses
+            designed for beginners, students and learners who
+            want useful practical skills. Every course focuses
+            on concepts, hands-on practice and real-world
+            applications.
           </p>
 
         </div>
@@ -401,7 +408,8 @@ function App() {
         </div>
 
       </section>
-<ComputerAnimations />
+
+
       {/* =========================
           ABOUT
       ========================= */}
@@ -420,21 +428,22 @@ function App() {
           <h2>About GROVER PT COLLEGE</h2>
 
           <p>
-            GROVER PT COLLEGE is focused on providing practical computer
-            education that students can understand easily and use in
-            real situations. Our training approach combines classroom
-            concepts with regular practice so that learners do not
-            simply memorise topics, but understand how technology is
-            actually used.
+            GROVER PT COLLEGE is focused on providing practical
+            computer education that students can understand easily
+            and use in real situations. Our training approach
+            combines classroom concepts with regular practice so
+            that learners do not simply memorise topics, but
+            understand how technology is actually used.
           </p>
 
           <p>
-            We offer a wide range of courses covering computer basics,
-            office productivity, programming, web development,
-            accounting, graphic designing and digital marketing.
-            Whether a student is starting from zero or wants to improve
-            existing skills, the learning path is designed to move
-            from basics towards practical and project-based work.
+            We offer a wide range of courses covering computer
+            basics, office productivity, programming, web
+            development, accounting, graphic designing and digital
+            marketing. Whether a student is starting from zero or
+            wants to improve existing skills, the learning path is
+            designed to move from basics towards practical and
+            project-based work.
           </p>
 
           <div className="about-points">
@@ -459,7 +468,8 @@ function App() {
               <span>03</span>
               <strong>Skill Development</strong>
               <p>
-                Build useful digital skills for academic and professional work.
+                Build useful digital skills for academic and
+                professional work.
               </p>
             </div>
 
@@ -468,6 +478,7 @@ function App() {
         </div>
 
       </section>
+
 
       {/* =========================
           WHY CHOOSE US
@@ -487,9 +498,9 @@ function App() {
           <h2>Why Choose Us?</h2>
 
           <p>
-            We focus on making computer learning practical, structured
-            and easy to follow so students can build confidence along
-            with technical knowledge.
+            We focus on making computer learning practical,
+            structured and easy to follow so students can build
+            confidence along with technical knowledge.
           </p>
 
         </div>
@@ -498,28 +509,37 @@ function App() {
 
           <div>
             <div className="why-icon">🎓</div>
+
             <h3>Practical Learning</h3>
+
             <p>
               Learn by doing instead of depending only on theory.
               Lessons can include examples, exercises, assignments
-              and project-based practice so students can apply each
-              concept immediately.
+              and project-based practice so students can apply
+              each concept immediately.
             </p>
           </div>
+
 
           <div>
             <div className="why-icon">💻</div>
+
             <h3>Programming & Technology Skills</h3>
+
             <p>
-              Build foundations in C, C++, Python and Java, along with
-              modern web technologies such as HTML, CSS, JavaScript,
-              React and Node.js for practical development skills.
+              Build foundations in C, C++, Python and Java, along
+              with modern web technologies such as HTML, CSS,
+              JavaScript, React and Node.js for practical
+              development skills.
             </p>
           </div>
 
+
           <div>
             <div className="why-icon">📊</div>
+
             <h3>Professional Computer Skills</h3>
+
             <p>
               Improve everyday workplace skills with MS Office,
               Advanced Excel, Tally, documentation, presentations,
@@ -527,33 +547,44 @@ function App() {
             </p>
           </div>
 
+
           <div>
             <div className="why-icon">🎨</div>
+
             <h3>Creative & Digital Skills</h3>
+
             <p>
-              Explore Graphic Designing and Digital Marketing to learn
-              practical skills related to visual content, social media,
-              online promotion, branding and digital communication.
+              Explore Graphic Designing and Digital Marketing to
+              learn practical skills related to visual content,
+              social media, online promotion, branding and digital
+              communication.
             </p>
           </div>
+
 
           <div>
             <div className="why-icon">🚀</div>
+
             <h3>Career-Oriented Approach</h3>
+
             <p>
-              Courses are planned around useful skills that can support
-              further study, personal projects, freelance work and
-              entry-level professional opportunities.
+              Courses are planned around useful skills that can
+              support further study, personal projects, freelance
+              work and entry-level professional opportunities.
             </p>
           </div>
 
+
           <div>
             <div className="why-icon">🧩</div>
+
             <h3>Step-by-Step Guidance</h3>
+
             <p>
-              Students can learn from basic concepts first and gradually
-              move to more advanced topics, making technical learning
-              easier to understand and practise confidently.
+              Students can learn from basic concepts first and
+              gradually move to more advanced topics, making
+              technical learning easier to understand and practise
+              confidently.
             </p>
           </div>
 
@@ -561,149 +592,116 @@ function App() {
 
       </section>
 
+
       {/* =========================
-          ADDRESS / VISIT US
+          ADDRESS
       ========================= */}
 
-     
-<section
-  className="address-section"
-  id="address"
->
-  <div className="address-tech-line"></div>
+      <section
+        className="address-section"
+        id="address"
+      >
 
-  <div className="address-wrapper">
+        <div className="address-wrapper">
 
-    {/* LEFT CONTENT */}
-    <div className="address-intro">
+          <div className="address-intro">
 
-      <span className="address-badge">
-        📍 VISIT OUR INSTITUTE
-      </span>
+            <span className="section-tag">
+              📍 VISIT OUR INSTITUTE
+            </span>
 
-      <h2>
-        Find Us.
-        <br />
-        <span>Your Learning Starts Here.</span>
-      </h2>
+            <h2>
+              Find GROVER PT COLLEGE
+            </h2>
 
-      <p>
-        Visit GROVER PT COLLEGE and explore practical computer
-        education in a professional learning environment. Connect
-        with us for course guidance, admission details and complete
-        information about our training programs.
-      </p>
+            <p>
+              Looking for practical computer training? Visit the
+              institute, discuss your learning goals and choose a
+              course that matches your future plans. Our address
+              and contact details can be displayed here so students
+              can easily find the institute.
+            </p>
 
-      <div className="address-feature-row">
+            <div className="address-note">
+              🗺️ Easy to locate • 💻 Computer Training • 🎓 Multiple Courses
+            </div>
 
-        <div className="address-mini-card">
-          <span>💻</span>
-          <strong>Practical Training</strong>
-          <small>Learn with real practice</small>
-        </div>
-
-        <div className="address-mini-card">
-          <span>🎓</span>
-          <strong>Career Courses</strong>
-          <small>Multiple computer programs</small>
-        </div>
-
-      </div>
-
-    </div>
-
-
-    {/* RIGHT ADDRESS CARD */}
-    <div className="address-visual">
-
-      <div className="map-grid">
-
-        <div className="map-route route-one"></div>
-        <div className="map-route route-two"></div>
-        <div className="map-route route-three"></div>
-
-        <div className="map-dot dot-one"></div>
-        <div className="map-dot dot-two"></div>
-        <div className="map-dot dot-three"></div>
-
-        <div className="location-pin">
-          <div className="pin-pulse"></div>
-          <div className="pin-icon">📍</div>
-        </div>
-
-        <div className="map-label">
-          GROVER PT COLLEGE
-        </div>
-
-      </div>
-
-
-      <div className="address-card">
-
-        <div className="address-card-top">
-
-          <div className="address-icon-box">
-            📍
           </div>
 
-          <div>
-            <span>OUR LOCATION</span>
-            <h3>Visit Us</h3>
+
+          <div className="address-card">
+
+            <div className="address-card-icon">
+              📍
+            </div>
+
+            <h3>
+              Institute Address
+            </h3>
+
+            <p>
+              Your Institute Address Here
+              <br />
+              Punjab, India
+            </p>
+
+
+            <div className="address-info">
+
+              <div>
+                <span>🕘</span>
+
+                <div>
+                  <strong>
+                    Visit & Enquiry
+                  </strong>
+
+                  <p>
+                    Contact the institute for current timings.
+                  </p>
+                </div>
+              </div>
+
+
+              <div>
+                <span>📞</span>
+
+                <div>
+                  <strong>
+                    Phone Support
+                  </strong>
+
+                  <p>
+                    Call the institute for course details
+                    and admission information.
+                  </p>
+                </div>
+              </div>
+
+
+              <div>
+                <span>💬</span>
+
+                <div>
+                  <strong>
+                    Course Guidance
+                  </strong>
+
+                  <p>
+                    Discuss your interests before selecting a course.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
           </div>
 
         </div>
 
-
-        <div className="address-text">
-          <p>
-            Building Number 68,<br />
-            City Centre Market,<br />
-            City Centre,<br />
-            Amritsar — 143001,<br />
-            Punjab
-          </p>
-        </div>
+      </section>
 
 
-        <a
-          href="tel:+917837385385"
-          className="phone-card"
-        >
-          <span>📞</span>
-
-          <div>
-            <small>Call for enquiries</small>
-            <strong>+91 7837385385</strong>
-          </div>
-        </a>
-
-
-        <div className="address-actions">
-
-          <a
-            href="tel:+917837385385"
-            className="address-call-btn"
-          >
-            📞 Call Now
-          </a>
-
-          <a
-            href="https://www.google.com/maps/search/?api=1&query=Building+Number+68%2C+City+Centre+Market%2C+City+Centre%2C+Amritsar+143001%2C+Punjab"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="address-map-btn"
-          >
-            🗺️ Open Maps
-          </a>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
       {/* =========================
           CONTACT
       ========================= */}
@@ -716,64 +714,322 @@ function App() {
         <div className="contact-intro">
 
           <span className="section-tag">
-            ✉️ GET IN TOUCH
+            ✦ CONNECT WITH GROVER PT COLLEGE
           </span>
 
-          <h2>Contact Us</h2>
+          <h2>
+            Let’s Start Your
+            <span> Learning Journey.</span>
+          </h2>
 
           <p>
-            Have a question about a course, fees, duration, syllabus
-            or admission? Send us your details and message. Our team
-            can use your enquiry to understand what information you need.
+            Have a question about a course, fees, duration,
+            syllabus, admission or career direction? Send us your
+            enquiry and share what you are looking for. We can
+            help you understand the available learning options
+            and choose a suitable path.
           </p>
 
         </div>
 
-        <form
-          className="contact-form"
-          onSubmit={handleSubmit}
-        >
 
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={name}
-            onChange={(e) =>
-              setName(e.target.value)
-            }
-          />
+        {/* CONTACT INFO CARDS */}
 
-          <input
-            type="email"
-            placeholder="Your Email"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-          />
+        <div className="contact-info-grid">
 
-          <input
-            type="tel"
-            placeholder="Your Phone"
-            value={phone}
-            onChange={(e) =>
-              setPhone(e.target.value)
-            }
-          />
+          <div className="contact-info-card">
 
-          <textarea
-            placeholder="Write your enquiry or message..."
-            value={message}
-            onChange={(e) =>
-              setMessage(e.target.value)
-            }
-          />
+            <div className="contact-info-icon">
+              ✦
+            </div>
 
-          <button type="submit">
-            Send Enquiry →
-          </button>
+            <div>
 
-        </form>
+              <span className="contact-info-label">
+                COURSE GUIDANCE
+              </span>
+
+              <h3>
+                Not sure what to choose?
+              </h3>
+
+              <p>
+                Tell us your interests, current level and learning
+                goals. We can help you understand the right course
+                direction.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="contact-info-card">
+
+            <div className="contact-info-icon">
+              ◉
+            </div>
+
+            <div>
+
+              <span className="contact-info-label">
+                ADMISSION ENQUIRY
+              </span>
+
+              <h3>
+                Need course details?
+              </h3>
+
+              <p>
+                Ask about course duration, fees, syllabus, practical
+                training and admission-related information.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="contact-info-card">
+
+            <div className="contact-info-icon">
+              ↗
+            </div>
+
+            <div>
+
+              <span className="contact-info-label">
+                CAREER SUPPORT
+              </span>
+
+              <h3>
+                Planning your next step?
+              </h3>
+
+              <p>
+                Discuss programming, web development, office skills,
+                design and other practical computer-learning options.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* MAIN CONTACT AREA */}
+
+        <div className="contact-main-grid">
+
+
+          {/* LEFT INFO PANEL */}
+
+          <div className="contact-side-panel">
+
+            <span className="contact-panel-tag">
+              GROVER PT COLLEGE
+            </span>
+
+            <h3>
+              Ask us anything about
+              your next course.
+            </h3>
+
+            <p>
+              Whether you are starting from the basics or looking
+              to build practical technical skills, you can send us
+              your questions through this enquiry form.
+            </p>
+
+
+            <div className="contact-check-list">
+
+              <div>
+                <span>✓</span>
+                <p>Course and syllabus guidance</p>
+              </div>
+
+              <div>
+                <span>✓</span>
+                <p>Fee and duration information</p>
+              </div>
+
+              <div>
+                <span>✓</span>
+                <p>Admission-related enquiries</p>
+              </div>
+
+              <div>
+                <span>✓</span>
+                <p>Career and skill guidance</p>
+              </div>
+
+            </div>
+
+
+            <div className="contact-mini-note">
+
+              <span>●</span>
+
+              <p>
+                Share your requirement clearly so your enquiry
+                can be understood quickly.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* CONTACT FORM */}
+
+          <form
+            className="contact-form"
+            onSubmit={handleSubmit}
+          >
+
+            <div className="contact-form-heading">
+
+              <span>
+                SEND AN ENQUIRY
+              </span>
+
+              <h3>
+                Tell us what you need
+              </h3>
+
+              <p>
+                Fill in the details below and write your question.
+              </p>
+
+            </div>
+
+
+            <div className="contact-form-row">
+
+              <div className="contact-field">
+
+                <label>
+                  Your Name
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) =>
+                    setName(e.target.value)
+                  }
+                />
+
+              </div>
+
+
+              <div className="contact-field">
+
+                <label>
+                  Your Email
+                </label>
+
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                />
+
+              </div>
+
+            </div>
+
+
+            <div className="contact-form-row">
+
+              <div className="contact-field full">
+
+                <label>
+                  Phone Number
+                </label>
+
+                <input
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={phone}
+                  onChange={(e) =>
+                    setPhone(e.target.value)
+                  }
+                />
+
+              </div>
+
+            </div>
+
+
+            <div className="contact-field">
+
+              <label>
+                Your Enquiry
+              </label>
+
+              <textarea
+                placeholder="Write your course enquiry, admission question or message..."
+                value={message}
+                onChange={(e) =>
+                  setMessage(e.target.value)
+                }
+              />
+
+            </div>
+
+
+            <div className="contact-form-footer">
+
+              <div className="contact-form-security">
+
+                <span>✓</span>
+
+                <p>
+                  Your enquiry details are used for communication
+                  regarding your request.
+                </p>
+
+              </div>
+
+
+              <button type="submit">
+                Send Enquiry
+                <span>→</span>
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+
+        {/* BOTTOM CTA */}
+
+        <div className="contact-bottom-strip">
+
+          <div>
+
+            <span className="contact-strip-dot" />
+
+            <p>
+              Ready to learn practical computer skills?
+            </p>
+
+          </div>
+
+          <strong>
+            Start with a simple enquiry today.
+          </strong>
+
+        </div>
 
       </section>
 
