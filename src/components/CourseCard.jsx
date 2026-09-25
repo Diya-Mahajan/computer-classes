@@ -1,223 +1,495 @@
-import { useState } from "react";
-import { supabase } from "../supabase";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { createClient } from "@supabase/supabase-js";
+import "./CourseCard.css";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabasePublishableKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+const supabase =
+  supabaseUrl && supabasePublishableKey
+    ? createClient(supabaseUrl, supabasePublishableKey)
+    : null;
 
 function CourseCard({
   name,
   description,
-  fee,
   duration,
-  topics
+  topics = [],
 }) {
-  const [showDetails, setShowDetails] = useState(false);
-  const [showEnrollForm, setShowEnrollForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-  const [studentName, setStudentName] = useState("");
-  const [studentEmail, setStudentEmail] = useState("");
-  const [studentPhone, setStudentPhone] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
 
-  const [saving, setSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleEnrollmentSubmit = async (e) => {
-    e.preventDefault();
+  /*
+    App.jsx currently sends topics as a comma-separated string.
+    Convert it safely into an array.
+  */
+  const topicList = Array.isArray(topics)
+    ? topics
+    : String(topics || "")
+        .split(",")
+        .map((topic) => topic.trim())
+        .filter(Boolean);
 
-    if (!studentName || !studentEmail || !studentPhone) {
-      alert("Please fill all fields");
+  const openModal = () => {
+    setShowModal(true);
+    setShowForm(false);
+    setSuccessMessage("");
+    setErrorMessage("");
+  };
+
+  const closeModal = () => {
+    if (isSubmitting) return;
+
+    setShowModal(false);
+    setShowForm(false);
+    setSuccessMessage("");
+    setErrorMessage("");
+  };
+
+  useEffect(() => {
+    if (!showModal) return;
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape" && !isSubmitting) {
+        closeModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [showModal, isSubmitting]);
+
+  const handleChange = (event) => {
+    const { name: fieldName, value } = event.target;
+
+    if (fieldName === "phone") {
+      const onlyNumbers = value
+        .replace(/\D/g, "")
+        .slice(0, 10);
+
+      setFormData((prev) => ({
+        ...prev,
+        [fieldName]: onlyNumbers,
+      }));
+
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    setSuccessMessage("");
+    setErrorMessage("");
+
+    const studentName = formData.name.trim();
+    const studentEmail = formData.email.trim();
+    const studentPhone = formData.phone.trim();
+
+    if (!studentName) {
+      setErrorMessage("Please enter your name.");
+      return;
+    }
+
+    if (!studentEmail) {
+      setErrorMessage("Please enter your email.");
       return;
     }
 
     if (!studentEmail.includes("@")) {
-      alert("Please enter a valid email");
+      setErrorMessage("Please enter a valid email.");
       return;
     }
 
     if (studentPhone.length !== 10) {
-      alert("Please enter a valid 10-digit phone number");
+      setErrorMessage(
+        "Please enter a valid 10-digit phone number."
+      );
       return;
     }
 
-    setSaving(true);
+    if (!supabase) {
+      setErrorMessage(
+        "Supabase connection is not configured. Please check your .env file."
+      );
+      return;
+    }
 
-    const enrollment = {
+    setIsSubmitting(true);
+
+    const enrollmentDate = new Date()
+      .toISOString()
+      .split("T")[0];
+
+    const enrollmentData = {
       name: studentName,
       email: studentEmail,
       phone: studentPhone,
       course: name,
-      date: new Date().toLocaleString()
+      date: enrollmentDate,
     };
 
     try {
-      // ==============================
-      // SAVE TO SUPABASE
-      // ==============================
-
+      /*
+        SUPABASE ENROLLMENT
+      */
       const { error } = await supabase
         .from("enrollments")
-        .insert([enrollment]);
+        .insert([enrollmentData]);
 
       if (error) {
-        console.error("Supabase Error:", error);
-
-        alert(
-          "Enrollment could not be saved online.\n\n" +
-          error.message
-        );
-
-        setSaving(false);
-        return;
+        throw error;
       }
 
-      // ==============================
-      // SAVE TO LOCAL STORAGE
-      // ==============================
+      /*
+        LOCAL STORAGE BACKUP
+      */
+      const existingEnrollments = JSON.parse(
+        localStorage.getItem("enrollments") || "[]"
+      );
 
-      const oldEnrollments =
-        JSON.parse(localStorage.getItem("enrollments")) || [];
-
-      oldEnrollments.push(enrollment);
+      const localEnrollment = {
+        id: Date.now(),
+        ...enrollmentData,
+      };
 
       localStorage.setItem(
         "enrollments",
-        JSON.stringify(oldEnrollments)
+        JSON.stringify([
+          localEnrollment,
+          ...existingEnrollments,
+        ])
       );
 
-      // ==============================
-      // SUCCESS
-      // ==============================
-
-      alert(
-        `Thank you ${studentName}!\n\n` +
-        `You have successfully enrolled in ${name}.`
+      setSuccessMessage(
+        "Enrollment submitted successfully! 🎉"
       );
 
-      setStudentName("");
-      setStudentEmail("");
-      setStudentPhone("");
-
-      setShowEnrollForm(false);
-      setShowDetails(false);
-
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+      });
     } catch (error) {
       console.error("Enrollment Error:", error);
 
-      alert(
-        "Something went wrong while saving enrollment."
+      setErrorMessage(
+        error?.message ||
+          "Enrollment failed. Please try again."
       );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setSaving(false);
   };
 
-  return (
-    <div className="course-card">
+  const modal = showModal
+    ? createPortal(
+        <div
+          className="gpc-enroll-overlay"
+          onMouseDown={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              !isSubmitting
+            ) {
+              closeModal();
+            }
+          }}
+        >
+          <div
+            className="gpc-enroll-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="gpc-enroll-title"
+          >
+            {/* HEADER */}
 
-      <h3>{name}</h3>
-
-      <p>{description}</p>
-
-      <button onClick={() => setShowDetails(true)}>
-        Learn More
-      </button>
-
-      {showDetails && (
-        <div className="course-modal">
-
-          <div className="modal-content">
-
-            <button
-              className="close-btn"
-              onClick={() => {
-                setShowDetails(false);
-                setShowEnrollForm(false);
-              }}
-            >
-              ×
-            </button>
-
-            <h2>{name}</h2>
-
-            <p>{description}</p>
-
-            <div className="course-info">
-
+            <div className="gpc-enroll-header">
               <div>
-                <strong>💰 Course Fee</strong>
-                <p>{fee || "Contact Us"}</p>
+                <span className="gpc-enroll-label">
+                  GROVER PT COLLEGE
+                </span>
+
+                <h2 id="gpc-enroll-title">
+                  {name}
+                </h2>
+
+                <p className="gpc-enroll-subtitle">
+                  Course details and enrollment
+                </p>
               </div>
 
-              <div>
-                <strong>⏰ Duration</strong>
-                <p>{duration || "Contact Us"}</p>
-              </div>
-
-              <div>
-                <strong>📚 Course Topics</strong>
-                <p>{topics || "Contact Us"}</p>
-              </div>
-
+              <button
+                type="button"
+                className="gpc-enroll-close"
+                onClick={closeModal}
+                aria-label="Close"
+                disabled={isSubmitting}
+              >
+                ×
+              </button>
             </div>
 
-            {!showEnrollForm && (
-              <button
-                className="enroll-btn"
-                onClick={() => setShowEnrollForm(true)}
-              >
-                Enroll Now
-              </button>
-            )}
+            {/* BODY */}
 
-            {showEnrollForm && (
-              <form
-                className="enroll-form"
-                onSubmit={handleEnrollmentSubmit}
-              >
+            <div className="gpc-enroll-body">
+              {!showForm ? (
+                <>
+                  <div className="gpc-course-description">
+                    {description}
+                  </div>
 
-                <h3>Enroll in {name}</h3>
+                  {/* DURATION ONLY */}
+                  <div className="gpc-course-info-grid">
+                    <div className="gpc-info-box">
+                      <span>⏰</span>
 
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  value={studentName}
-                  onChange={(e) =>
-                    setStudentName(e.target.value)
-                  }
-                />
+                      <small>DURATION</small>
 
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  value={studentEmail}
-                  onChange={(e) =>
-                    setStudentEmail(e.target.value)
-                  }
-                />
+                      <strong>
+                        {duration || "Contact Us"}
+                      </strong>
+                    </div>
+                  </div>
 
-                <input
-                  type="tel"
-                  placeholder="Your Phone"
-                  value={studentPhone}
-                  onChange={(e) =>
-                    setStudentPhone(e.target.value)
-                  }
-                />
+                  {/* TOPICS */}
 
-                <button
-                  type="submit"
-                  className="submit-enroll"
-                  disabled={saving}
+                  {topicList.length > 0 && (
+                    <div className="gpc-topics-section">
+                      <h3>
+                        What You Will Learn
+                      </h3>
+
+                      <div className="gpc-topics-grid">
+                        {topicList.map(
+                          (topic, index) => (
+                            <div
+                              className="gpc-topic-item"
+                              key={`${topic}-${index}`}
+                            >
+                              <span>✓</span>
+
+                              <p>
+                                {topic}
+                              </p>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    className="gpc-primary-btn"
+                    onClick={() => {
+                      setShowForm(true);
+                      setSuccessMessage("");
+                      setErrorMessage("");
+                    }}
+                  >
+                    Enroll Now →
+                  </button>
+                </>
+              ) : (
+                <form
+                  className="gpc-enroll-form"
+                  onSubmit={handleSubmit}
                 >
-                  {saving
-                    ? "Saving..."
-                    : "Submit Enrollment"}
-                </button>
+                  <div className="gpc-form-intro">
+                    <span>🎓</span>
 
-              </form>
-            )}
+                    <div>
+                      <h3>
+                        Complete Your Enrollment
+                      </h3>
 
+                      <p>
+                        Enter your details and we
+                        will contact you regarding
+                        your course.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* NAME */}
+
+                  <div className="gpc-field">
+                    <label htmlFor="student-name">
+                      Full Name
+                    </label>
+
+                    <input
+                      id="student-name"
+                      name="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Enter your full name"
+                      autoComplete="name"
+                      required
+                    />
+                  </div>
+
+                  {/* EMAIL */}
+
+                  <div className="gpc-field">
+                    <label htmlFor="student-email">
+                      Email Address
+                    </label>
+
+                    <input
+                      id="student-email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+
+                  {/* PHONE */}
+
+                  <div className="gpc-field">
+                    <label htmlFor="student-phone">
+                      Phone Number
+                    </label>
+
+                    <input
+                      id="student-phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit mobile number"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      maxLength={10}
+                      required
+                    />
+                  </div>
+
+                  {/* COURSE */}
+
+                  <div className="gpc-selected-course">
+                    <span>
+                      Selected Course
+                    </span>
+
+                    <strong>
+                      {name}
+                    </strong>
+                  </div>
+
+                  {/* ERROR */}
+
+                  {errorMessage && (
+                    <div className="gpc-form-message gpc-error">
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  {/* SUCCESS */}
+
+                  {successMessage && (
+                    <div className="gpc-form-message gpc-success">
+                      {successMessage}
+                    </div>
+                  )}
+
+                  {/* BUTTONS */}
+
+                  <div className="gpc-form-actions">
+                    <button
+                      type="button"
+                      className="gpc-secondary-btn"
+                      onClick={() => {
+                        setShowForm(false);
+                        setErrorMessage("");
+                        setSuccessMessage("");
+                      }}
+                      disabled={isSubmitting}
+                    >
+                      ← Back
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="gpc-submit-btn"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting
+                        ? "Submitting..."
+                        : "Submit Enrollment"}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      )
+    : null;
 
-    </div>
+  return (
+    <>
+      <article className="course-card">
+        <div className="course-card-content">
+          <h3>
+            {name}
+          </h3>
+
+          <p>
+            {description}
+          </p>
+        </div>
+
+        <div className="course-card-bottom">
+          <div className="course-card-meta">
+            <span>
+              ⏰ {duration || "Contact Us"}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="enroll-btn"
+            onClick={openModal}
+          >
+            View Course & Enroll
+          </button>
+        </div>
+      </article>
+
+      {modal}
+    </>
   );
 }
 

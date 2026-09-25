@@ -1,0 +1,908 @@
+/* =========================================================
+   GROVER PT COLLEGE
+   PREMIUM COURSE ENROLLMENT MODAL
+   Completely independent from old modal CSS
+   ========================================================= */
+
+.gpc-enroll-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+
+  padding: 18px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(34, 211, 238, 0.12),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(124, 58, 237, 0.16),
+      transparent 28%
+    ),
+    rgba(2, 8, 23, 0.84) !important;
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  overscroll-behavior: contain;
+
+  z-index: 2147483647 !important;
+
+  box-sizing: border-box !important;
+}
+
+.gpc-enroll-overlay *,
+.gpc-enroll-overlay *::before,
+.gpc-enroll-overlay *::after {
+  box-sizing: border-box !important;
+}
+
+.gpc-enroll-modal {
+  position: relative !important;
+
+  width: min(700px, calc(100vw - 36px)) !important;
+  max-width: 700px !important;
+
+  min-width: 0 !important;
+
+  max-height: calc(100dvh - 36px) !important;
+
+  margin: auto !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  overflow: hidden !important;
+
+  border-radius: 26px !important;
+
+  border: 1px solid rgba(77, 190, 255, 0.25) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10, 25, 55, 0.98),
+      rgba(7, 18, 39, 0.98)
+    ) !important;
+
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, 0.58),
+    0 0 55px rgba(34, 211, 238, 0.08) !important;
+
+  color: #ffffff !important;
+
+  animation: gpcModalOpen 0.3s ease-out both;
+}
+
+.gpc-enroll-modal::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 4px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #22d3ee,
+      #3b82f6,
+      #8b5cf6
+    );
+
+  z-index: 2;
+}
+
+.gpc-enroll-header {
+  position: relative;
+
+  flex-shrink: 0;
+
+  padding: 30px 68px 22px 28px;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.09);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(19, 49, 97, 0.95),
+      rgba(11, 28, 62, 0.95)
+    );
+}
+
+.gpc-enroll-label {
+  display: inline-block;
+
+  margin-bottom: 8px;
+
+  color: #67e8f9;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+}
+
+.gpc-enroll-header h2 {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: clamp(26px, 4vw, 37px);
+  line-height: 1.15;
+  font-weight: 850;
+
+  overflow-wrap: anywhere;
+}
+
+.gpc-enroll-subtitle {
+  margin: 8px 0 0;
+
+  color: rgba(226, 232, 240, 0.72);
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.gpc-enroll-close {
+  position: absolute !important;
+
+  top: 18px !important;
+  right: 18px !important;
+
+  width: 44px !important;
+  height: 44px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.1) !important;
+
+  border-radius: 12px !important;
+
+  background:
+    rgba(255, 255, 255, 0.06) !important;
+
+  color: #ffffff !important;
+
+  font-size: 28px !important;
+  line-height: 1 !important;
+
+  cursor: pointer !important;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.gpc-enroll-close:hover {
+  transform: rotate(4deg) scale(1.05);
+
+  background:
+    rgba(239, 68, 68, 0.18) !important;
+
+  border-color:
+    rgba(248, 113, 113, 0.35) !important;
+}
+
+.gpc-enroll-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gpc-enroll-body {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  padding: 26px 28px 28px;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  overscroll-behavior: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(103, 232, 249, 0.55)
+    transparent;
+}
+
+.gpc-enroll-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.gpc-enroll-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gpc-enroll-body::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      #22d3ee,
+      #7c3aed
+    );
+
+  border-radius: 20px;
+}
+
+.gpc-course-description {
+  margin: 0 0 20px;
+
+  color: rgba(226, 232, 240, 0.82);
+
+  font-size: 15px;
+  line-height: 1.8;
+
+  overflow-wrap: anywhere;
+}
+
+.gpc-course-info-grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 13px;
+
+  margin-bottom: 24px;
+}
+
+.gpc-info-box {
+  min-width: 0;
+
+  padding: 18px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.065),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.gpc-info-box > span {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 20px;
+}
+
+.gpc-info-box small {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: rgba(148, 163, 184, 0.8);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.gpc-info-box strong {
+  display: block;
+
+  color: #ffffff;
+
+  font-size: 19px;
+  font-weight: 800;
+
+  overflow-wrap: anywhere;
+}
+
+.gpc-topics-section {
+  margin-top: 4px;
+}
+
+.gpc-topics-section h3 {
+  margin: 0 0 14px;
+
+  color: #ffffff;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.gpc-topics-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+.gpc-topic-item {
+  min-width: 0;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 9px;
+
+  padding: 11px 12px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+}
+
+.gpc-topic-item span {
+  flex: 0 0 auto;
+
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    rgba(34, 211, 238, 0.12);
+
+  color: #67e8f9;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.gpc-topic-item p {
+  min-width: 0;
+
+  margin: 1px 0 0;
+
+  color: rgba(226, 232, 240, 0.78);
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  overflow-wrap: anywhere;
+}
+
+.gpc-primary-btn,
+.gpc-submit-btn {
+  width: 100% !important;
+
+  min-height: 54px !important;
+
+  margin-top: 24px !important;
+  padding: 14px 18px !important;
+
+  border: none !important;
+
+  border-radius: 14px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #06b6d4,
+      #2563eb,
+      #7c3aed
+    ) !important;
+
+  color: #ffffff !important;
+
+  font-size: 15px !important;
+  font-weight: 850 !important;
+
+  cursor: pointer !important;
+
+  box-shadow:
+    0 15px 35px
+    rgba(37, 99, 235, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.gpc-primary-btn:hover,
+.gpc-submit-btn:hover {
+  transform: translateY(-2px);
+
+  filter: brightness(1.06);
+
+  box-shadow:
+    0 19px 40px
+    rgba(37, 99, 235, 0.32);
+}
+
+.gpc-primary-btn:active,
+.gpc-submit-btn:active {
+  transform: translateY(0);
+}
+
+.gpc-form-intro {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 13px;
+
+  margin-bottom: 22px;
+
+  padding: 16px;
+
+  border:
+    1px solid rgba(34, 211, 238, 0.12);
+
+  border-radius: 15px;
+
+  background:
+    rgba(34, 211, 238, 0.05);
+}
+
+.gpc-form-intro > span {
+  flex: 0 0 auto;
+
+  font-size: 25px;
+}
+
+.gpc-form-intro h3 {
+  margin: 0 0 4px;
+
+  color: #ffffff;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.gpc-form-intro p {
+  margin: 0;
+
+  color: rgba(203, 213, 225, 0.7);
+
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.gpc-enroll-form {
+  width: 100%;
+}
+
+.gpc-field {
+  width: 100%;
+
+  margin-bottom: 16px;
+}
+
+.gpc-field label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: rgba(226, 232, 240, 0.92);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gpc-field input {
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  height: 50px !important;
+
+  margin: 0 !important;
+  padding: 0 14px !important;
+
+  border:
+    1px solid rgba(148, 163, 184, 0.18) !important;
+
+  border-radius: 12px !important;
+
+  outline: none !important;
+
+  background:
+    rgba(255, 255, 255, 0.055) !important;
+
+  color: #ffffff !important;
+
+  font-size: 14px !important;
+
+  box-shadow: none !important;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.gpc-field input::placeholder {
+  color:
+    rgba(148, 163, 184, 0.58);
+}
+
+.gpc-field input:focus {
+  border-color:
+    rgba(34, 211, 238, 0.55) !important;
+
+  background:
+    rgba(255, 255, 255, 0.075) !important;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(34, 211, 238, 0.08) !important;
+}
+
+.gpc-selected-course {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 14px 15px;
+
+  margin-top: 8px;
+
+  border:
+    1px solid rgba(124, 58, 237, 0.2);
+
+  border-radius: 13px;
+
+  background:
+    rgba(124, 58, 237, 0.07);
+}
+
+.gpc-selected-course span {
+  color:
+    rgba(203, 213, 225, 0.72);
+
+  font-size: 12px;
+}
+
+.gpc-selected-course strong {
+  color: #c4b5fd;
+
+  font-size: 13px;
+
+  text-align: right;
+
+  overflow-wrap: anywhere;
+}
+
+.gpc-form-message {
+  margin-top: 14px;
+
+  padding: 12px 13px;
+
+  border-radius: 12px;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gpc-error {
+  border:
+    1px solid rgba(248, 113, 113, 0.2);
+
+  background:
+    rgba(248, 113, 113, 0.08);
+
+  color: #fecaca;
+}
+
+.gpc-success {
+  border:
+    1px solid rgba(52, 211, 153, 0.22);
+
+  background:
+    rgba(52, 211, 153, 0.08);
+
+  color: #a7f3d0;
+}
+
+.gpc-form-actions {
+  display: grid;
+
+  grid-template-columns:
+    minmax(110px, 0.8fr)
+    minmax(0, 1.5fr);
+
+  gap: 10px;
+
+  margin-top: 17px;
+}
+
+.gpc-secondary-btn {
+  width: 100% !important;
+
+  min-height: 54px !important;
+
+  margin: 0 !important;
+  padding: 12px 14px !important;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.11) !important;
+
+  border-radius: 14px !important;
+
+  background:
+    rgba(255, 255, 255, 0.045) !important;
+
+  color:
+    rgba(226, 232, 240, 0.9) !important;
+
+  font-size: 14px !important;
+  font-weight: 750 !important;
+
+  cursor: pointer !important;
+}
+
+.gpc-submit-btn {
+  margin: 0 !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #10b981,
+      #06b6d4,
+      #2563eb
+    ) !important;
+}
+
+.gpc-submit-btn:disabled,
+.gpc-secondary-btn:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed !important;
+
+  transform: none !important;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .gpc-enroll-overlay {
+    padding: 12px !important;
+
+    align-items: flex-start !important;
+  }
+
+  .gpc-enroll-modal {
+    width: min(680px, calc(100vw - 24px)) !important;
+
+    max-height: calc(100dvh - 24px) !important;
+
+    margin: 0 auto !important;
+
+    border-radius: 22px !important;
+  }
+
+  .gpc-enroll-header {
+    padding:
+      25px 62px 18px 21px;
+  }
+
+  .gpc-enroll-body {
+    padding:
+      21px 20px 23px;
+  }
+
+  .gpc-topics-grid {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 520px) {
+  .gpc-enroll-overlay {
+    padding: 8px !important;
+  }
+
+  .gpc-enroll-modal {
+    width: calc(100vw - 16px) !important;
+
+    max-width: none !important;
+
+    max-height: calc(100dvh - 16px) !important;
+
+    border-radius: 18px !important;
+  }
+
+  .gpc-enroll-header {
+    padding:
+      23px 55px 17px 17px;
+  }
+
+  .gpc-enroll-label {
+    font-size: 9px;
+    letter-spacing: 1.35px;
+  }
+
+  .gpc-enroll-header h2 {
+    font-size: 24px;
+  }
+
+  .gpc-enroll-subtitle {
+    font-size: 12px;
+  }
+
+  .gpc-enroll-close {
+    top: 13px !important;
+    right: 13px !important;
+
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .gpc-enroll-body {
+    padding:
+      18px 15px 18px;
+  }
+
+  .gpc-course-description {
+    font-size: 14px;
+
+    line-height: 1.7;
+  }
+
+  .gpc-course-info-grid {
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 8px;
+  }
+
+  .gpc-info-box {
+    padding: 14px;
+  }
+
+  .gpc-info-box strong {
+    font-size: 16px;
+  }
+
+  .gpc-info-box small {
+    font-size: 9px;
+  }
+
+  .gpc-form-actions {
+    grid-template-columns:
+      1fr;
+  }
+
+  .gpc-selected-course {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .gpc-selected-course strong {
+    text-align: left;
+  }
+}
+
+/* =========================================================
+   VERY SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 380px) {
+  .gpc-enroll-overlay {
+    padding: 5px !important;
+  }
+
+  .gpc-enroll-modal {
+    width: calc(100vw - 10px) !important;
+
+    max-height: calc(100dvh - 10px) !important;
+
+    border-radius: 15px !important;
+  }
+
+  .gpc-enroll-header {
+    padding:
+      20px 52px 15px 14px;
+  }
+
+  .gpc-enroll-header h2 {
+    font-size: 21px;
+  }
+
+  .gpc-enroll-body {
+    padding:
+      15px 12px 16px;
+  }
+
+  .gpc-course-info-grid {
+    gap: 7px;
+  }
+
+  .gpc-info-box {
+    padding: 12px;
+  }
+
+  .gpc-info-box strong {
+    font-size: 15px;
+  }
+
+  .gpc-primary-btn,
+  .gpc-submit-btn,
+  .gpc-secondary-btn {
+    min-height: 50px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY / MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .gpc-enroll-modal {
+    animation: none;
+  }
+
+  .gpc-primary-btn,
+  .gpc-submit-btn,
+  .gpc-enroll-close {
+    transition: none;
+  }
+}
+
+@keyframes gpcModalOpen {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
